@@ -19,7 +19,7 @@ require('./config/passport')(passport);
 
 // db setup
 mongoose.connect(
-	process.env.DB_URI,
+	process.env.MONGODB_URI,
 	{
 		useNewUrlParser: true,
 		useCreateIndex: true
