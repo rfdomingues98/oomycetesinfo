@@ -86,6 +86,6 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/dashboard', dashboardRouter);
 
-app.listen(port, () => {
+app.listen(process.env.PORT || port, () => {
 	console.log(`Server listening on port ${port}...`);
 });
