@@ -1,0 +1,28 @@
+<%- contentFor('header') %>
+<img src="/img/dna-banner.jpg" alt="dna banner" class="img-fluid mx-auto d-block p-2">
+<h1 class="page-title text-center mt-3"><%= _locals.title %></h1>
+
+<%- contentFor('body') %>
+<main>
+
+	<div class="container text-center">
+		<a href="primers" class="btn btn-primary mt-3">Primers</a>
+		<a href="#!" class="btn btn-primary mt-3">Oligonucleotides</a>
+		<a href="#!" class="btn btn-primary mt-3">Conserved Regions</a>
+		<hr class="my-5">
+		<div class="row">
+			<div class="col-md-4">
+				<p>Development by:</p>
+				<p>Ricardo Domingues</p>
+			</div>
+			<div class="col-md-4">
+				<a href="/users/login" class="btn btn-primary mt-3">Sign in</a>
+				<a href="/users/register" class="btn btn-primary mt-3">Sign up</a>
+			</div>
+			<div class="col-md-4">
+				<p>Research by:</p>
+				<p>Micaela Martins</p>
+			</div>
+		</div>
+	</div>
+</main>
