@@ -9,7 +9,7 @@ const session = require('express-session');
 const passport = require('passport');
 
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 dotenv.config();
 
@@ -86,6 +86,6 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/dashboard', dashboardRouter);
 
-app.listen(process.env.PORT || port, () => {
+app.listen(port, () => {
 	console.log(`Server listening on port ${port}...`);
 });
