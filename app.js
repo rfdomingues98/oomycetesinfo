@@ -49,10 +49,6 @@ app.use(expressLayouts);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// app.use(fileUpload({
-// 	limits: { fileSize: 5 * 1024 * 1024 } //2Mb max per file
-// }));
-
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Paginate Middleware
@@ -68,7 +64,6 @@ app.use(session({
 // Passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
-
 
 
 // Setup flash messages

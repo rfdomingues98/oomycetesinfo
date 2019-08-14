@@ -7,32 +7,39 @@ const mongoose = require('mongoose');
 const Primer = require('../models/primers');
 
 router.get('/', (req, res) => {
+	let perPage = 10;
 	ctx = {
-		title: 'Oomycetes Info'
+		title: 'Oomycetes Info',
+		perPage
 	};
 	res.render('index', ctx);
 });
 
-router.get('/primers', (req, res, next) => {
+router.get('/primers', async (req, res, next) => {
+	let page = req.query.page || 1;
+	let perPage = req.query.perPage || 5;
 
-	const Primers = new Primer();
+	//{ page, perPage } = req.query;
+	let maxPerPage = 10;
+	let options = {
+		page: parseInt(page, 10),
+		limit: parseInt(perPage, 10) > maxPerPage ? maxPerPage : parseInt(perPage, 10),
+		sort: { date: -1 }
+	};
 
-	Primers.find({ primer: 'Test primer 1' }).then(console.log('Success!'));
-
-	let itemCount = Object.keys(data).length,
-		itemsPerPage = 10,
-		pageCount = Math.ceil(itemCount / itemsPerPage);
+	const primers = await Primer.paginate({}, options);
 	ctx = {
 		title: 'Primers Info',
-		//data: data,
-		//! Fix get data from db
+		data: primers
 	};
 	res.render('primers', ctx);
 });
 router.get('/file', (req, res) => {
 	let filepath = `/../articles/${req.query.id}`;
 	fs.readFile(__dirname + filepath, (err, data) => {
-		if (err) throw err;
+		if (err) {
+			return res.status(404).send('File not found!');
+		}
 		res.contentType("application/pdf");
 		res.send(data);
 	});
