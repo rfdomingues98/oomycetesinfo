@@ -71,12 +71,26 @@ router.post('/add_primers', ensureAuthenticated, (req, res, next) => {
 		if (pdf[i] == '')
 			pdf[i] = '#!';
 	}
+
+
+	if (typeof (article) == "string") {
+		article = [article];
+	}
+	if (typeof (link) == "string") {
+		link = [link];
+	}
+	if (typeof (pdf) == "string") {
+		pdf = [pdf];
+	}
 	const checkDuplicate = (arr, duplicate) => {
 		return arr.filter(item => item == duplicate).length;
 	};
-
+	console.log(article);
 	for (let j = 0; j < 5; j++) {
 		let radio = req.body['customRadio' + (j + 1)];
+		if (article[j] == '' && ((link[j] != '' && link[j] != '#!') || (pdf[j] != '' && pdf[j] != '#!'))) {
+			article[j] = "Link";
+		}
 		if (radio == 'link') {
 			if (link[j] != '#!') {
 				if (checkDuplicate(link, link[j]) > 1) {

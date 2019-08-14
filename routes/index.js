@@ -19,7 +19,6 @@ router.get('/primers', async (req, res, next) => {
 	let page = req.query.page || 1;
 	let perPage = req.query.perPage || 5;
 
-	//{ page, perPage } = req.query;
 	let maxPerPage = 10;
 	let options = {
 		page: parseInt(page, 10),
