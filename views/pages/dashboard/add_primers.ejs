@@ -48,7 +48,7 @@
 									<% } %>
 								</select>
 							</div>
-							<a href="#!" data-toggle="modal" data-target="#exampleModalCenter">+ Add new pdf
+							<a href="#!" data-toggle="modal" data-target="#addFileModal">+ Add new pdf
 								file</a>
 						</div>
 					</div>
@@ -70,6 +70,7 @@
 		</div>
 		<input class="btn btn-primary my-3" formaction="/dashboard/add_primers" type="submit" value="Insert primer">
 	</form>
+	<a href="/dashboard" class="btn btn-primary my-3">Go back</a>
 
 	<% include upload_file.ejs %>
 </div>

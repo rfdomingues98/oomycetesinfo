@@ -159,13 +159,32 @@ router.get('/add_regions', ensureAuthenticated, (req, res) => {
 	);
 });
 
-router.get('/manage_primers', ensureAuthenticated, (req, res) => {
-	res.render('./dashboard/manage_primers',
-		{
-			layout: 'layout_dashboard',
-			title: 'Manage Primers'
-		}
-	);
+router.get('/manage_primers', ensureAuthenticated, async (req, res) => {
+	const pdfDir = './articles/';
+	let pdfList = [];
+	fs.readdirSync(pdfDir).forEach(file => {
+		pdfList.push(file);
+	});
+
+	let page = req.query.page || 1;
+	let perPage = req.query.perPage || 5;
+
+	let maxPerPage = 10;
+	let options = {
+		page: parseInt(page, 10),
+		limit: parseInt(perPage, 10) > maxPerPage ? maxPerPage : parseInt(perPage, 10),
+		sort: { date: -1 }
+	};
+
+	const primers = await Primer.paginate({}, options);
+
+	ctx = {
+		layout: 'layout_dashboard',
+		title: 'Manage Primers',
+		data: primers,
+		pdfList: pdfList.sort()
+	};
+	res.render('./dashboard/manage_primers', ctx);
 });
 
 router.get('/manage_oligonucleotides', ensureAuthenticated, (req, res) => {
@@ -206,6 +225,19 @@ router.post('/uploadpdf', ensureAuthenticated, (req, res) => {
 				req.flash('success_msg', 'File uploaded successfully!');
 				res.redirect('/dashboard/add_primers');
 			}
+		}
+	});
+});
+
+router.post('/delete/:id', ensureAuthenticated, (req, res, next) => {
+	console.log(req.params.id);
+	Primer.deleteOne({ _id: req.params.id }, (err) => {
+		if (err) {
+			req.flash('error', 'Failed to delete primer!');
+			res.redirect('/dashboard/manage_primers');
+		} else {
+			req.flash('success_msg', 'Primer deleted successfully!');
+			res.redirect('/dashboard/manage_primers');
 		}
 	});
 });

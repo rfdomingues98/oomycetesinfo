@@ -1,0 +1,90 @@
+<div class="modal fade" id="editPrimerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+	aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="editPrimerModalTitle">Edit Primer</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<form action="/dashboard/edit/<%= data.docs[i]._id %>" method="POST" enctype="multipart/form-data">
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="inputPrimer">Primer</label>
+						<input type="text" class="form-control" name="primer" id="inputPrimer" placeholder="Primer">
+					</div>
+					<div class="form-group">
+						<label for="inputSequence">Sequence</label>
+						<input type="text" class="form-control" name="sequence" id="inputSequence"
+							placeholder="Sequence">
+					</div>
+					<div class="form-group">
+						<label>Articles (max. 5)</label>
+						<div id="articles" class="container">
+							<label for="inputArticle1">Article 1</label>
+							<input type="text" class="form-control" name="article" id="inputArticle1"
+								placeholder="Name">
+							<div class="form-row">
+								<div class="col-3">
+									<div class="custom-control custom-radio mt-3">
+										<input type="radio" id="isLink1" name="customRadio1" value="link"
+											class="custom-control-input radio_toggle" checked>
+										<label class="custom-control-label" for="isLink1">Link</label>
+									</div>
+									<div class="custom-control custom-radio mt-3">
+										<input type="radio" id="isPDF1" name="customRadio1" value="pdf"
+											class="custom-control-input radio_toggle">
+										<label class="custom-control-label" for="isPDF1">PDF</label>
+									</div>
+								</div>
+								<div class="col-9 mt-3">
+									<div id="linkInput1" class="form-group">
+										<label for="inputLink1">Link</label>
+										<input type="text" class="form-control" name="link" id="inputLink1"
+											placeholder="Link">
+									</div>
+									<div id="pdfInput1" class="form-group">
+										<div class="input-group mb-1">
+											<div class="input-group-prepend">
+												<label class="input-group-text" for="pdfSelect">PDF</label>
+											</div>
+											<select class="custom-select" name="pdf" size="2" id="pdfSelect1">
+												<option value="#!" selected>Choose a pdf...</option>
+												<% for(let i = 0; i < pdfList.length; i++) { %>
+												<option value="<%=pdfList[i] %>"><%= pdfList[i] %></option>
+												<% } %>
+											</select>
+										</div>
+										<a href="#!" data-toggle="modal" data-target="#addFileModal">+ Add new pdf
+											file</a>
+									</div>
+								</div>
+							</div>
+						</div>
+						<a href="#!" class="add_article">+ Add more articles</a>
+					</div>
+					<div class="form-group">
+						<label for="inputBlast">BLAST</label>
+						<input type="text" class="form-control" name="blast" id="inputBlast" placeholder="BLAST">
+					</div>
+					<div class="form-group">
+						<label>Notes (max. 5)</label>
+						<div class="container" id="notes" name="notes">
+							<label for="inputNotes1">Note 1</label>
+							<input type="text" class="form-control" name="note" id="inputNotes1" placeholder="Note">
+						</div>
+						<a href="#!" class="add_note">+ Add more notes</a>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<button type="submit" formaction="/dashboard/edit/<%= data.docs[i]._id %>" id="edit_primer"
+						class="btn btn-primary">Edit Primer</button>
+					<button type="submit" formaction="/dashboard/delete/<%= data.docs[i]._id %>" id="delete_primer"
+						class="btn btn-primary">Delete Primer</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
