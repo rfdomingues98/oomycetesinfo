@@ -82,6 +82,10 @@ router.post('/add_primers', ensureAuthenticated, (req, res, next) => {
 	if (typeof (pdf) == "string") {
 		pdf = [pdf];
 	}
+	if (typeof (note) == "string") {
+		note = [note];
+	}
+
 	const checkDuplicate = (arr, duplicate) => {
 		return arr.filter(item => item == duplicate).length;
 	};
@@ -230,15 +234,17 @@ router.post('/uploadpdf', ensureAuthenticated, (req, res) => {
 });
 
 router.post('/delete/:id', ensureAuthenticated, (req, res, next) => {
-	console.log(req.params.id);
-	Primer.deleteOne({ _id: req.params.id }, (err) => {
+	Primer.findByIdAndDelete({ _id: req.params.id }, (err, result) => {
 		if (err) {
+			console.log(err);
 			req.flash('error', 'Failed to delete primer!');
 			res.redirect('/dashboard/manage_primers');
 		} else {
+			console.log(result);
 			req.flash('success_msg', 'Primer deleted successfully!');
 			res.redirect('/dashboard/manage_primers');
 		}
+		next();
 	});
 });
 
