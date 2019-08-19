@@ -4,8 +4,15 @@ const mongoosePaginate = require('mongoose-paginate-v2');
 // Create Schema
 const Schema = mongoose.Schema;
 const primersSchema = new Schema({
-	primer: String,
-	sequence: String,
+	primer: {
+		type: String,
+		required: true
+	},
+	sequence: {
+		type: String,
+		unique: true,
+		required: true
+	},
 	articles: [
 		{
 			name: String,
@@ -24,6 +31,16 @@ const primersSchema = new Schema({
 		default: Date.now
 	}
 });
+
+var handleE11000 = function (error, res, next) {
+	if (error.name === 'MongoError' && error.code === 11000) {
+		next(new Error('There was a duplicate key error'));
+	} else {
+		next();
+	}
+};
+
+primersSchema.post('save', handleE11000);
 
 primersSchema.plugin(mongoosePaginate);
 

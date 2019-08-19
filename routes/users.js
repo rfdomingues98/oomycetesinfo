@@ -20,7 +20,6 @@ router.post('/register', (req, res, next) => {
 	} else if (password !== password2) {
 		req.flash('warning_msg', 'Passwords don\'t match!');
 		res.redirect('./register');
-		//req.flash('warning_msg', 'Passwords nao sao iguais');
 	} else if (password.length < 8 || !/\d/.test(password)) {
 		req.flash('warning_msg', 'Password should have at least 8 characters & 1 digit!');
 		res.redirect('./register');

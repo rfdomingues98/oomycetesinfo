@@ -17,7 +17,7 @@ router.get('/', (req, res) => {
 
 router.get('/primers', async (req, res, next) => {
 	let page = req.query.page || 1;
-	let perPage = req.query.perPage || 5;
+	let perPage = req.query.perPage || 10;
 
 	let maxPerPage = 10;
 	let options = {

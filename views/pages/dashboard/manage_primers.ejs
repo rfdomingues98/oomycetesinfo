@@ -17,7 +17,8 @@
 				<th scope="col">Sites/Articles</th>
 				<th scope="col">BLAST Results</th>
 				<th scope="col">Notes</th>
-				<th scope="col">Edit / Delete</th>
+				<th scope="col">Edit</th>
+				<th scope="col">Delete</th>
 			</thead>
 			<tbody>
 				<% for(i in data.docs) { %>
@@ -48,13 +49,25 @@
 						<% } %>
 					</td>
 					<td align="center" style="vertical-align:middle;">
-						<a href="#!" data-toggle="modal" data-target="#editPrimerModal" class="text-primary">
-							<svg enable-background="new 0 0 24 24" height="24px" version="1.1" viewBox="0 0 24 24"
-								width="24px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+						<a href="/dashboard/edit/<%= data.docs[i]._id %>">
+							<svg enable-background="new 0 0 24 24" height="24" version="1.1" viewBox="0 0 24 24"
+								width="24" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
 								xmlns:xlink="http://www.w3.org/1999/xlink" fill="currentColor" stroke="none"
 								stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
 								<path
-									d="M21.635,6.366c-0.467-0.772-1.043-1.528-1.748-2.229c-0.713-0.708-1.482-1.288-2.269-1.754L19,1C19,1,21,1,22,2S23,5,23,5  L21.635,6.366z M10,18H6v-4l0.48-0.48c0.813,0.385,1.621,0.926,2.348,1.652c0.728,0.729,1.268,1.535,1.652,2.348L10,18z M20.48,7.52  l-8.846,8.845c-0.467-0.771-1.043-1.529-1.748-2.229c-0.712-0.709-1.482-1.288-2.269-1.754L16.48,3.52  c0.813,0.383,1.621,0.924,2.348,1.651C19.557,5.899,20.097,6.707,20.48,7.52z M4,4v16h16v-7l3-3.038V21c0,1.105-0.896,2-2,2H3  c-1.104,0-2-0.895-2-2V3c0-1.104,0.896-2,2-2h11.01l-3.001,3H4z" />
+									d="M18 14.45v6.55h-16v-12h6.743l1.978-2h-10.721v16h20v-10.573l-2 2.023zm1.473-10.615l1.707 1.707-9.281 9.378-2.23.472.512-2.169 9.292-9.388zm-.008-2.835l-11.104 11.216-1.361 5.784 5.898-1.248 11.103-11.218-4.536-4.534z" />
+							</svg>
+						</a>
+					</td>
+					<td align="center" style="vertical-align:middle;">
+						<a href="#!" data-toggle="modal" data-target="#confirmDeleteModal"
+							data-href="/dashboard/delete/<%= data.docs[i]._id %>">
+							<svg enable-background="new 0 0 24 24" height="24" version="1.1" viewBox="0 0 24 24"
+								width="24" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+								xmlns:xlink="http://www.w3.org/1999/xlink" fill="currentColor" stroke="currentColor"
+								stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+								<path
+									d="M9 3h6v-1.75c0-.066-.026-.13-.073-.177-.047-.047-.111-.073-.177-.073h-5.5c-.066 0-.13.026-.177.073-.047.047-.073.111-.073.177v1.75zm11 1h-16v18c0 .552.448 1 1 1h14c.552 0 1-.448 1-1v-18zm-10 3.5c0-.276-.224-.5-.5-.5s-.5.224-.5.5v12c0 .276.224.5.5.5s.5-.224.5-.5v-12zm5 0c0-.276-.224-.5-.5-.5s-.5.224-.5.5v12c0 .276.224.5.5.5s.5-.224.5-.5v-12zm8-4.5v1h-2v18c0 1.105-.895 2-2 2h-14c-1.105 0-2-.895-2-2v-18h-2v-1h7v-2c0-.552.448-1 1-1h6c.552 0 1 .448 1 1v2h7z" />
 							</svg>
 						</a>
 					</td>
@@ -65,5 +78,5 @@
 	</div>
 	<% include ../partials/_paginate.ejs %>
 	<a href="/dashboard" class="btn btn-primary my-3">Go back</a>
-	<% include edit_primers.ejs %>
+	<% include ../partials/_confirm_delete.ejs %>
 </div>

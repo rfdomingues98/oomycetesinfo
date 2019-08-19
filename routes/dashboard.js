@@ -8,7 +8,8 @@ const Primer = require('../models/primers');
 
 var storage = multer.diskStorage({
 	destination: function (req, file, cb) {
-		cb(null, './articles');
+		let directory = path.join(__dirname, '../articles');
+		cb(null, directory);
 	},
 	filename: function (req, file, cb) {
 		cb(null, file.originalname);
@@ -61,88 +62,105 @@ router.get('/add_primers', ensureAuthenticated, (req, res, next) => {
 
 router.post('/add_primers', ensureAuthenticated, (req, res, next) => {
 	let { primer, sequence, article, link, pdf, blast, note } = req.body;
-	let articles = [];
-	let notes = [];
-	for (let i = 0; i < link.length; i++) {
-		if (link[i] == '')
-			link[i] = '#!';
-	}
-	for (let i = 0; i < pdf.length; i++) {
-		if (pdf[i] == '')
-			pdf[i] = '#!';
-	}
 
-
-	if (typeof (article) == "string") {
-		article = [article];
-	}
-	if (typeof (link) == "string") {
-		link = [link];
-	}
-	if (typeof (pdf) == "string") {
-		pdf = [pdf];
-	}
-	if (typeof (note) == "string") {
-		note = [note];
-	}
-
-	const checkDuplicate = (arr, duplicate) => {
-		return arr.filter(item => item == duplicate).length;
-	};
-	console.log(article);
-	for (let j = 0; j < 5; j++) {
-		let radio = req.body['customRadio' + (j + 1)];
-		if (article[j] == '' && ((link[j] != '' && link[j] != '#!') || (pdf[j] != '' && pdf[j] != '#!'))) {
-			article[j] = "Link";
-		}
-		if (radio == 'link') {
-			if (link[j] != '#!') {
-				if (checkDuplicate(link, link[j]) > 1) {
-					req.flash('warning_msg', 'Duplicate articles are not allowed!');
-					res.redirect('/dashboard/add_primers');
-				}
-			}
-			let objArticle = {
-				'name': article[j],
-				'pdf': false,
-				'link': link[j]
-			};
-			articles.push(objArticle);
-		} else if (radio == 'pdf') {
-			if (pdf[j] != '#!') {
-				if (checkDuplicate(pdf, pdf[j]) > 1) {
-					req.flash('warning_msg', 'Duplicate articles are not allowed!');
-					res.redirect('/dashboard/add_primers');
-				}
-			}
-			let objArticle = {
-				'name': article[j],
-				'pdf': true,
-				'link': pdf[j]
-			};
-			articles.push(objArticle);
-		}
-		if (note[j])
-			notes.push({ 'note': note[j] });
-	}
-
-	let obj = new Primer({
-		primer,
-		sequence,
-		articles,
-		blast,
-		notes
-	});
-
-	obj
-		.save()
-		.then(() => {
-			req.flash('success_msg', 'Added primer successfully!');
+	Primer.find({ "sequence": sequence }, (err, result) => {
+		if (err)
+			return console.log(err);
+		if (result.sequence == sequence) {
+			req.flash('error', 'That sequence already exists in our database!');
 			res.redirect('/dashboard/add_primers');
-		})
-		.catch(err => {
-			console.log(err);
-		});
+		} else {
+			let articles = [];
+			let notes = [];
+			if (article != undefined) {
+				for (let i = 0; i < link.length; i++) {
+					if (link[i] == '')
+						link[i] = '#!';
+				}
+				for (let i = 0; i < pdf.length; i++) {
+					if (pdf[i] == '')
+						pdf[i] = '#!';
+				}
+			} else {
+				article = {};
+			}
+
+
+			if (typeof (article) == "string") {
+				article = [article];
+			}
+			if (typeof (link) == "string") {
+				link = [link];
+			}
+			if (typeof (pdf) == "string") {
+				pdf = [pdf];
+			}
+			if (typeof (note) == "string") {
+				note = [note];
+			}
+
+			const checkDuplicate = (arr, duplicate) => {
+				return arr.filter(item => item == duplicate).length;
+			};
+			for (let j = 0; j < 5; j++) {
+				let radio = req.body['customRadio' + (j + 1)];
+				if (article[j] == '' && ((link[j] != '' && link[j] != '#!') || (pdf[j] != '' && pdf[j] != '#!'))) {
+					article[j] = "Link";
+				}
+				if (radio == 'link') {
+					if (link[j] != '#!') {
+						if (checkDuplicate(link, link[j]) > 1) {
+							req.flash('warning_msg', 'Duplicate articles are not allowed!');
+							res.redirect('/dashboard/add_primers');
+						}
+					}
+					let objArticle = {
+						'name': article[j],
+						'pdf': false,
+						'link': link[j]
+					};
+					articles.push(objArticle);
+				} else if (radio == 'pdf') {
+					if (pdf[j] != '#!') {
+						if (checkDuplicate(pdf, pdf[j]) > 1) {
+							req.flash('warning_msg', 'Duplicate articles are not allowed!');
+							res.redirect('/dashboard/add_primers');
+						}
+					}
+					let objArticle = {
+						'name': article[j],
+						'pdf': true,
+						'link': pdf[j]
+					};
+					articles.push(objArticle);
+				}
+				if (note != undefined) {
+					if (note[j])
+						notes.push({ 'note': note[j] });
+				} else {
+					note = {};
+				}
+			}
+
+			let obj = new Primer({
+				primer,
+				sequence,
+				articles,
+				blast,
+				notes
+			});
+
+			obj
+				.save()
+				.then(() => {
+					req.flash('success_msg', 'Added primer successfully!');
+					res.redirect('/dashboard/add_primers');
+				})
+				.catch(err => {
+					console.log(err);
+				});
+		}
+	});
 });
 
 router.get('/add_oligonucleotides', ensureAuthenticated, (req, res) => {
@@ -233,7 +251,123 @@ router.post('/uploadpdf', ensureAuthenticated, (req, res) => {
 	});
 });
 
-router.post('/delete/:id', ensureAuthenticated, (req, res, next) => {
+router.get('/edit/:id', ensureAuthenticated, (req, res) => {
+	Primer.find({ _id: req.params.id }, (err, result) => {
+		if (err) {
+			return res.send('Page not found!');
+		}
+		const pdfDir = './articles/';
+		let pdfList = [];
+		fs.readdirSync(pdfDir).forEach(file => {
+			pdfList.push(file);
+		});
+		ctx = {
+			layout: 'layout_dashboard',
+			title: 'Edit Primers',
+			data: result[0],
+			pdfList: pdfList.sort()
+		};
+		res.render('./dashboard/edit_primers', ctx);
+	});
+});
+
+router.post('/edit/:id', ensureAuthenticated, (req, res) => {
+	let { primer, sequence, article, link, pdf, blast, note } = req.body;
+	console.log(req.body);
+	let articles = [];
+	let notes = [];
+	if (article != undefined) {
+		for (let i = 0; i < link.length; i++) {
+			if (link[i] == '')
+				link[i] = '#!';
+		}
+		for (let i = 0; i < pdf.length; i++) {
+			if (pdf[i] == '')
+				pdf[i] = '#!';
+		}
+	} else {
+		article = {};
+	}
+
+
+	if (typeof (article) == "string") {
+		article = [article];
+	}
+	if (typeof (link) == "string") {
+		link = [link];
+	}
+	if (typeof (pdf) == "string") {
+		pdf = [pdf];
+	}
+	if (typeof (note) == "string") {
+		note = [note];
+	}
+
+	const checkDuplicate = (arr, duplicate) => {
+		return arr.filter(item => item == duplicate).length;
+	};
+	for (let j = 0; j < 5; j++) {
+		let radio = req.body['customRadio' + (j + 1)];
+		if (article[j] == '' && ((link[j] != '' && link[j] != '#!') || (pdf[j] != '' && pdf[j] != '#!'))) {
+			article[j] = "Link";
+		}
+		if (radio == 'link') {
+			if (link[j] != '#!') {
+				if (checkDuplicate(link, link[j]) > 1) {
+					req.flash('warning_msg', 'Duplicate articles are not allowed!');
+					res.redirect('/dashboard/edit/' + req.params.id);
+				}
+			}
+			let objArticle = {
+				'name': article[j],
+				'pdf': false,
+				'link': link[j]
+			};
+			articles.push(objArticle);
+		} else if (radio == 'pdf') {
+			if (pdf[j] != '#!') {
+				if (checkDuplicate(pdf, pdf[j]) > 1) {
+					req.flash('warning_msg', 'Duplicate articles are not allowed!');
+					res.redirect('/dashboard/edit/' + req.params.id);
+				}
+			}
+			let objArticle = {
+				'name': article[j],
+				'pdf': true,
+				'link': pdf[j]
+			};
+			articles.push(objArticle);
+		}
+		if (note != undefined) {
+			if (note[j])
+				notes.push({ 'note': note[j] });
+		} else {
+			note = {};
+		}
+	}
+
+	let obj = {
+		primer,
+		sequence,
+		articles,
+		blast,
+		notes
+	};
+
+	Primer.findByIdAndUpdate(req.params.id, obj, { new: true }, (err, result) => {
+		if (err) {
+			console.log(err);
+			req.flash('warning_msg', 'Failed to update primer!');
+			res.redirect('/dashboard/edit/' + req.params.id);
+		} else {
+			console.log(result);
+			req.flash('success_msg', 'Primer updated successfully!');
+			res.redirect('/dashboard/manage_primers');
+		}
+	});
+});
+
+router.get('/delete/:id', ensureAuthenticated, (req, res, next) => {
 	Primer.findByIdAndDelete({ _id: req.params.id }, (err, result) => {
 		if (err) {
 			console.log(err);
@@ -244,7 +378,6 @@ router.post('/delete/:id', ensureAuthenticated, (req, res, next) => {
 			req.flash('success_msg', 'Primer deleted successfully!');
 			res.redirect('/dashboard/manage_primers');
 		}
-		next();
 	});
 });
 
