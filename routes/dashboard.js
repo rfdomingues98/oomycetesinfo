@@ -1,40 +1,52 @@
 const express = require('express');
 const router = express.Router();
 const fs = require('fs');
+const aws = require('aws-sdk');
 const multer = require('multer');
+const multerS3 = require('multer-s3');
 const path = require('path');
+const crypto = require('crypto');
 
 const Primer = require('../models/primers');
 
-var storage = multer.diskStorage({
-	destination: function (req, file, cb) {
-		let directory = path.join(__dirname, '../articles');
-		cb(null, directory);
-	},
-	filename: function (req, file, cb) {
-		cb(null, file.originalname);
-	}
-});
-
-var upload = multer({
-	fileFilter: (req, file, cb) => {
-		if (file.mimetype != 'application/pdf') {
-			req.fileValidationError = 'File upload supports pdf files only!';
-			return cb(null, false, new Error('Filetype not supported!'));
-		}
-		cb(null, true);
-
-	},
-	storage: storage,
-	limits: {
-		fileSize: 10 * 1024 * 1024
-	}
-}
-).single('pdfup');
-
-
 const { ensureAuthenticated } = require('../config/auth');
 
+
+aws.config.update({
+	accessKeyId: process.env.AWS_ACCESS_KEY,
+	secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+	region: 'eu-west-3'
+});
+
+const s3 = new aws.S3();
+
+const upload = multer({
+	fileFilter: (req, file, cb) => {
+		fileCheck(file, cb);
+	},
+	storage: multerS3({
+		s3: s3,
+		bucket: process.env.AWS_BUCKET_NAME,
+		key: (req, file, cb) => {
+			cb(null, 'articles/' + file.originalname);
+		}
+	}),
+	limits: {
+		fileSize: 10000000
+	}
+}).single('pdfup');
+
+const fileCheck = (file, cb) => {
+	const filetypes = /pdf/;
+	const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+	const mimetype = filetypes.test(file.mimetype);
+
+	if (mimetype && extname) {
+		return cb(null, true);
+	} else {
+		cb('File not supported! Only pdf allowed!');
+	}
+};
 
 router.get('/', ensureAuthenticated, (req, res) => {
 	res.render('./dashboard/dashboard',
@@ -46,23 +58,26 @@ router.get('/', ensureAuthenticated, (req, res) => {
 });
 
 router.get('/add_primers', ensureAuthenticated, (req, res, next) => {
-	const pdfDir = './articles/';
-	let pdfList = [];
-	fs.readdirSync(pdfDir).forEach(file => {
-		pdfList.push(file);
-	});
-	res.render('./dashboard/add_primers',
-		{
+	let params = {
+		Bucket: process.env.AWS_BUCKET_NAME,
+		Prefix: 'articles/'
+	};
+	s3.listObjectsV2(params, (err, data) => {
+		if (err)
+			return console.log(err);
+		data.Contents.shift();
+		let ctx = {
 			layout: 'layout_dashboard',
 			title: 'Add Primers',
-			'pdfList': pdfList.sort()
-		}
-	);
+			pdfList: data.Contents
+		};
+		res.render('./dashboard/add_primers', ctx);
+	});
 });
 
 router.post('/add_primers', ensureAuthenticated, (req, res, next) => {
 	let { primer, sequence, article, link, pdf, blast, note } = req.body;
-
+	sequence = sequence.trim();
 	Primer.find({ "sequence": sequence }, (err, result) => {
 		if (err)
 			return console.log(err);
@@ -229,23 +244,16 @@ router.get('/manage_regions', ensureAuthenticated, (req, res) => {
 
 router.post('/uploadpdf', ensureAuthenticated, (req, res) => {
 	upload(req, res, (err) => {
-		if (req.fileValidationError) {
-			req.flash('error', req.fileValidationError);
-			res.redirect('/dashboard/add_primers');
-		} else if (err) {
-			res.status(500);
-			if (err.code == 'LIMIT_FILE_SIZE') {
-				req.flash('error', 'File should be max. 10mb!');
-				res.redirect('/dashboard/add_primers');
-			}
+		if (err) {
+			req.flash('error', err.message);
+			res.redirect('/dashboard');
 		} else {
-			if (!req.file || req.file == undefined) {
-				req.flash('error', 'File not found!');
-				res.redirect('/dashboard/add_primers');
+			if (req.file == undefined) {
+				req.flash('error', 'No file selected!');
+				res.redirect('/dashboard');
 			} else {
-				res.status(200);
 				req.flash('success_msg', 'File uploaded successfully!');
-				res.redirect('/dashboard/add_primers');
+				res.redirect('/dashboard');
 			}
 		}
 	});
@@ -256,18 +264,24 @@ router.get('/edit/:id', ensureAuthenticated, (req, res) => {
 		if (err) {
 			return res.send('Page not found!');
 		}
-		const pdfDir = './articles/';
-		let pdfList = [];
-		fs.readdirSync(pdfDir).forEach(file => {
-			pdfList.push(file);
-		});
-		ctx = {
-			layout: 'layout_dashboard',
-			title: 'Edit Primers',
-			data: result[0],
-			pdfList: pdfList.sort()
+
+		let params = {
+			Bucket: process.env.AWS_BUCKET_NAME,
+			Prefix: 'articles/'
 		};
-		res.render('./dashboard/edit_primers', ctx);
+		s3.listObjectsV2(params, (err, data) => {
+			if (err)
+				return console.log(err);
+			data.Contents.shift();
+			let ctx = {
+				layout: 'layout_dashboard',
+				title: 'Add Primers',
+				data: result[0],
+				pdfList: data.Contents
+			};
+			res.render('./dashboard/edit_primers', ctx);
+			console.log(ctx.pdfList);
+		});
 	});
 });
 

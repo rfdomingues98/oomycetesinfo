@@ -40,17 +40,10 @@
 		<input class="btn btn-primary my-3" type="submit" value="Insert primer">
 	</form>
 	<a href="/dashboard" class="btn btn-primary my-3">Go back</a>
-
-	<% include ../partials/upload_file.ejs %>
 </div>
 
 <%- contentFor('scripts') %>
 <script type="text/javascript">
-	let inputFile = document.querySelector(' #inputFile'); inputFile.addEventListener('change', () => {
-		let fileName = inputFile.value.slice(12);
-		document.getElementById('fileLabel').innerHTML = fileName;
-	});
-
 	$(document).ready(() => {
 		let maxFields = 5;
 		let minFields = 0;
@@ -128,14 +121,13 @@
 															<select class="custom-select"
 															size="2" name="pdf" id="pdfSelect${article_count}">
 																<option value="#!" selected>Choose a pdf...</option>
+																<% if(pdfList != undefined) { %>
 																<% for(let i = 0; i < pdfList.length; i++) { %>
-																<option value="<%=pdfList[i] %>"><%= pdfList[i] %></option>
+																<option value="<%=pdfList[i].ETag %>"><%= pdfList[i].Key.replace("articles/", "") %></option>
+																<% } %>
 																<% } %>
 															</select>
 														</div>
-														<a href="#!" data-toggle="modal"
-															data-target="#addFileModal">+ Add new pdf
-															file</a>
 													</div>
 												</div>
 											</div>

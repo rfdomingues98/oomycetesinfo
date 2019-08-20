@@ -65,9 +65,11 @@
 										<option value="#!">Choose a pdf...</option>
 										<% for(let j = 0; j < pdfList.length; j++) { %>
 										<% if(data.articles[i].link == pdfList[j]) { %>
-										<option value="<%=pdfList[j] %>" selected><%= pdfList[j] %></option>
+										<option value="<%=pdfList[j].ETag %>" selected>
+											<%= pdfList[j].Key.replace("articles/", "") %></option>
 										<% } else { %>
-										<option value="<%=pdfList[j] %>"><%= pdfList[j] %></option>
+										<option value="<%=pdfList[j].ETag %>">
+											<%= pdfList[j].Key.replace("articles/", "") %></option>
 										<% } %>
 										<% } %>
 									</select>
@@ -127,7 +129,6 @@
 
 		let article_count = articles.children().length;
 		let note_count = notes.children().length;
-		console.log(note_count);
 
 		const showHideFields = () => {
 			for (let i = 1; i <= article_count; i++) {
@@ -192,15 +193,14 @@
 															</div>
 															<select class="custom-select"
 															size="2" name="pdf" id="pdfSelect${article_count}">
-																<option value="#!" selected>Choose a pdf...</option>
-																<% for(let i = 0; i < pdfList.length; i++) { %>
-																<option value="<%=pdfList[i] %>"><%= pdfList[i] %></option>
-																<% } %>
+															<option value="#!" selected>Choose a pdf...</option>
+															<% if(pdfList != undefined) { %>
+															<% for(let i = 0; i < pdfList.length; i++) { %>
+															<option value="<%=pdfList[i].ETag %>"><%= pdfList[i].Key.replace("articles/", "") %></option>
+															<% } %>
+															<% } %>
 															</select>
 														</div>
-														<a href="#!" data-toggle="modal"
-															data-target="#addFileModal">+ Add new pdf
-															file</a>
 													</div>
 												</div>
 											</div>

@@ -7,6 +7,7 @@ const dotenv = require('dotenv');
 const flash = require('connect-flash');
 const session = require('express-session');
 const passport = require('passport');
+const MongoStore = require('connect-mongo')(session);
 
 
 const port = process.env.PORT || 3000;
@@ -56,15 +57,16 @@ app.use(paginate.middleware(10, 20));
 
 // Express Session
 app.use(session({
+	store: new MongoStore({ mongooseConnection: mongoose.connection }),
 	secret: process.env.SESSION_SECRET,
 	resave: 'true',
-	saveUninitialized: 'true'
+	saveUninitialized: 'true',
+	maxAge: 24 * 60 * 60 * 1000
 }));
 
 // Passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
-
 
 // Setup flash messages
 app.use(flash());
