@@ -65,10 +65,10 @@
 										<option value="#!">Choose a pdf...</option>
 										<% for(let j = 0; j < pdfList.length; j++) { %>
 										<% if(data.articles[i].link == pdfList[j]) { %>
-										<option value="<%=pdfList[j].ETag %>" selected>
+										<option value="<%=pdfList[j].Key.replace('articles/', '') %>" selected>
 											<%= pdfList[j].Key.replace("articles/", "") %></option>
 										<% } else { %>
-										<option value="<%=pdfList[j].ETag %>">
+										<option value="<%=pdfList[j].Key.replace('articles/', '') %>">
 											<%= pdfList[j].Key.replace("articles/", "") %></option>
 										<% } %>
 										<% } %>

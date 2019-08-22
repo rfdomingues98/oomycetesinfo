@@ -28,7 +28,7 @@
 					<td>
 						<% for(let j = 0; j < data.docs[i].articles.length; j++) { %>
 						<% if (data.docs[i].articles[j].pdf) { %>
-						<a href="/file?id=<%= data.docs[i].articles[j].link %>"
+						<a href="/download/<%= data.docs[i].articles[j].link %>"
 							target="_blank"><%= data.docs[i].articles[j].name %></a>
 						<% } else { %>
 						<a href="<%= data.docs[i].articles[j].link %>"

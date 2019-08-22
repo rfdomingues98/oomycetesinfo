@@ -4,11 +4,10 @@
 
 <%- contentFor('body') %>
 <main>
-
 	<div class="container text-center">
-		<a href="primers?page=1&perPage=<%=perPage %>" class="btn btn-primary mt-3">Primers</a>
+		<a href="primers?page=1&perPage=<%= perPage %>" class="btn btn-primary mt-3">Primers</a>
 		<a href="#!" class="btn btn-primary mt-3">Oligonucleotides</a>
-		<a href="#!" class="btn btn-primary mt-3">Target Regions</a>
+		<a href="regions?page=1&perPage=<%= perPage %>" class="btn btn-primary mt-3">Target Regions</a>
 		<hr class="my-5">
 		<div class="row">
 			<div class="col-md-4">

@@ -8,6 +8,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const Primer = require('../models/primers');
+const Region = require('../models/regions');
 
 const { ensureAuthenticated } = require('../config/auth');
 
@@ -88,18 +89,21 @@ router.post('/add_primers', ensureAuthenticated, (req, res, next) => {
 			let articles = [];
 			let notes = [];
 			if (article != undefined) {
-				for (let i = 0; i < link.length; i++) {
-					if (link[i] == '')
-						link[i] = '#!';
+				if (link != undefined) {
+					for (let i = 0; i < link.length; i++) {
+						if (link[i] == '')
+							link[i] = '#!';
+					}
 				}
-				for (let i = 0; i < pdf.length; i++) {
-					if (pdf[i] == '')
-						pdf[i] = '#!';
+				if (pdf != undefined) {
+					for (let i = 0; i < pdf.length; i++) {
+						if (pdf[i] == '')
+							pdf[i] = '#!';
+					}
 				}
 			} else {
 				article = {};
 			}
-
 
 			if (typeof (article) == "string") {
 				article = [article];
@@ -188,12 +192,198 @@ router.get('/add_oligonucleotides', ensureAuthenticated, (req, res) => {
 });
 
 router.get('/add_regions', ensureAuthenticated, (req, res) => {
-	res.render('./dashboard/add_regions',
-		{
+	let params = {
+		Bucket: process.env.AWS_BUCKET_NAME,
+		Prefix: 'articles/'
+	};
+	s3.listObjectsV2(params, (err, data) => {
+		if (err)
+			return console.log(err);
+		data.Contents.shift();
+		let ctx = {
 			layout: 'layout_dashboard',
-			title: 'Add Conserved Regions'
+			title: 'Add Target Regions',
+			pdfList: data.Contents
+		};
+		res.render('./dashboard/add_regions', ctx);
+	});
+});
+
+router.post('/add_regions', ensureAuthenticated, (req, res) => {
+	let { region, sequence, article, link, pdf, blast, unite, bold, phyto, note, primerName, primerSequence, primerBlast, primerNote, ampSequenceName, ampSequenceSequence, ampSequenceBlast, ampSequenceUnite, ampSequenceBold, ampSequencePhyto, ampSequenceNote } = req.body;
+
+	sequence = sequence.trim();
+
+	Region.find({ "sequence": sequence }, (err, result) => {
+		if (err)
+			return console.log(err);
+		if (result.sequence == sequence) {
+			req.flash('error', 'That sequence already exists in our database!');
+			res.redirect('/dashboard/add_regions');
+		} else {
+			let articles = [];
+			let notes = [];
+			let primers = [];
+			let amp_sequences = [];
+
+			if (article != undefined) {
+				if (link != undefined) {
+					for (let i = 0; i < link.length; i++) {
+						if (link[i] == '')
+							link[i] = '#!';
+					}
+				}
+				if (pdf != undefined) {
+					for (let i = 0; i < pdf.length; i++) {
+						if (pdf[i] == '')
+							pdf[i] = '#!';
+					}
+				}
+			} else {
+				article = {};
+			}
+
+			if (typeof (article) == "string") {
+				article = [article];
+			}
+			if (typeof (link) == "string") {
+				link = [link];
+			}
+			if (typeof (pdf) == "string") {
+				pdf = [pdf];
+			}
+			if (typeof (note) == "string") {
+				note = [note];
+			}
+			if (typeof (primerName) == "string") {
+				primerName = [primerName];
+			}
+			if (typeof (primerSequence) == "string") {
+				primerSequence = [primerSequence];
+			}
+			if (typeof (primerNote) == "string") {
+				primerNote = [primerNote];
+			}
+			if (typeof (ampSequenceName) == "string") {
+				ampSequenceName = [ampSequenceName];
+			}
+			if (typeof (ampSequenceSequence) == "string") {
+				ampSequenceSequence = [ampSequenceSequence];
+			}
+			if (typeof (ampSequenceBlast) == "string") {
+				ampSequenceBlast = [ampSequenceBlast];
+			}
+			if (typeof (ampSequenceUnite) == "string") {
+				ampSequenceUnite = [ampSequenceUnite];
+			}
+			if (typeof (ampSequenceBold) == "string") {
+				ampSequenceBold = [ampSequenceBold];
+			}
+			if (typeof (ampSequencePhyto) == "string") {
+				ampSequencePhyto = [ampSequencePhyto];
+			}
+			if (typeof (ampSequenceNote) == "string") {
+				ampSequenceNote = [ampSequenceNote];
+			}
+
+			const checkDuplicate = (arr, duplicate) => {
+				return arr.filter(item => item == duplicate).length;
+			};
+			for (let j = 0; j < 5; j++) {
+				let radio = req.body['customRadio' + (j + 1)];
+				if (article[j] == '' && ((link[j] != '' && link[j] != '#!') || (pdf[j] != '' && pdf[j] != '#!'))) {
+					article[j] = "Link";
+				}
+				if (radio == 'link') {
+					if (link[j] != '#!') {
+						if (checkDuplicate(link, link[j]) > 1) {
+							req.flash('warning_msg', 'Duplicate articles are not allowed!');
+							res.redirect('/dashboard/add_primers');
+						}
+					}
+					let objArticle = {
+						'name': article[j],
+						'pdf': false,
+						'link': link[j]
+					};
+					articles.push(objArticle);
+				} else if (radio == 'pdf') {
+					if (pdf[j] != '#!') {
+						if (checkDuplicate(pdf, pdf[j]) > 1) {
+							req.flash('warning_msg', 'Duplicate articles are not allowed!');
+							res.redirect('/dashboard/add_primers');
+						}
+					}
+					let objArticle = {
+						'name': article[j],
+						'pdf': true,
+						'link': pdf[j]
+					};
+					articles.push(objArticle);
+				}
+
+				if (note != undefined) {
+					if (note[j])
+						notes.push({ 'note': note[j] });
+				} else {
+					note = {};
+				}
+
+				if (primerSequence != undefined) {
+					if (primerSequence[j] != undefined) {
+						primerSequence[j] = primerSequence[j].trim();
+					}
+					let objPrimer = {
+						primer: primerName[j],
+						sequence: primerSequence[j],
+						blast: primerBlast[j],
+						notes: primerNote[j]
+					};
+					if (primerName[j] && primerSequence[j])
+						primers.push(objPrimer);
+				}
+				if (ampSequenceSequence != undefined) {
+					if (ampSequenceSequence[j] != undefined) {
+						ampSequenceSequence[j] = ampSequenceSequence[j].trim();
+					}
+					let objAmpSequence = {
+						name: ampSequenceName[j],
+						sequence: ampSequenceSequence[j],
+						blast: ampSequenceBlast[j],
+						unite: ampSequenceUnite[j],
+						boldsystems: ampSequenceBold[j],
+						phytophthoradb: ampSequencePhyto[j],
+						notes: ampSequenceNote[j]
+					};
+					if (ampSequenceName[j] && ampSequenceSequence[j])
+						amp_sequences.push(objAmpSequence);
+				}
+			}
+
+			let obj = new Region({
+				region,
+				sequence,
+				articles,
+				blast,
+				unite,
+				bold,
+				phyto,
+				notes,
+				primers,
+				amp_sequences
+			});
+
+			obj
+				.save()
+				.then(() => {
+					req.flash('success_msg', 'Added region successfully!');
+					res.redirect('/dashboard/add_regions');
+				})
+				.catch(err => {
+					console.log(err);
+				});
 		}
-	);
+	});
 });
 
 router.get('/manage_primers', ensureAuthenticated, async (req, res) => {
@@ -237,7 +427,7 @@ router.get('/manage_regions', ensureAuthenticated, (req, res) => {
 	res.render('./dashboard/manage_regions',
 		{
 			layout: 'layout_dashboard',
-			title: 'Manage Conserved Regions'
+			title: 'Manage Target Regions'
 		}
 	);
 });
@@ -280,24 +470,26 @@ router.get('/edit/:id', ensureAuthenticated, (req, res) => {
 				pdfList: data.Contents
 			};
 			res.render('./dashboard/edit_primers', ctx);
-			console.log(ctx.pdfList);
 		});
 	});
 });
 
 router.post('/edit/:id', ensureAuthenticated, (req, res) => {
 	let { primer, sequence, article, link, pdf, blast, note } = req.body;
-	console.log(req.body);
 	let articles = [];
 	let notes = [];
 	if (article != undefined) {
-		for (let i = 0; i < link.length; i++) {
-			if (link[i] == '')
-				link[i] = '#!';
+		if (link != undefined) {
+			for (let i = 0; i < link.length; i++) {
+				if (link[i] == '')
+					link[i] = '#!';
+			}
 		}
-		for (let i = 0; i < pdf.length; i++) {
-			if (pdf[i] == '')
-				pdf[i] = '#!';
+		if (pdf != undefined) {
+			for (let i = 0; i < pdf.length; i++) {
+				if (pdf[i] == '')
+					pdf[i] = '#!';
+			}
 		}
 	} else {
 		article = {};

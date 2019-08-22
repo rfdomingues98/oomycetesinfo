@@ -1,0 +1,53 @@
+<div class="modal fade" id="showRegionPrimers" tabindex="-1" role="dialog" aria-labelledby="showRegionPrimersTitle"
+	aria-hidden="true">
+	<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="showRegionPrimersTitle">Primers</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="table-responsive">
+					<table class="table table-striped table-bordered">
+						<thead class="thead-dark">
+							<th scope="col">Name</th>
+							<th scope="col">Sequence</th>
+							<th scope="col">BLAST</th>
+							<th scope="col">Notes</th>
+						</thead>
+						<tbody>
+							<% for(let j = 0; j < data.docs[i].primers.length; j++) { %>
+							<tr>
+								<td><%= data.docs[i].primers[j].primer %></td>
+								<td><%= data.docs[i].primers[j].sequence %></td>
+								<td><%= data.docs[i].primers[j].blast %></td>
+								<td><%= data.docs[i].primers[j].notes %></td>
+							</tr>
+							<% } %>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<%- contentFor('scripts') %>
+<script>
+	var id;
+	$('#showRegionPrimers').on('show.bs.modal', (e) => {
+		id = $(e.relatedTarget).data('id');
+		eval('var obj=' + id);
+		console.log(obj.primer);
+	})
+
+	var xhttp;
+	xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = () => {
+	}
+</script>

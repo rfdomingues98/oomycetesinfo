@@ -1,0 +1,193 @@
+<%- contentFor('styles') %>
+<style>
+	#searchFor {
+		border-top-right-radius: 0;
+		border-bottom-right-radius: 0;
+	}
+</style>
+
+<%- contentFor('header') %>
+<header>
+	<h1 class="page-title text-center mt-5"><%= title %></h1>
+</header>
+
+<%- contentFor('body') %>
+<div class="container-fluid">
+	<form id="search" action="/regions/search" method="POST" class="form-inline my-2 my-lg-0">
+		<div class="input-group mb-3">
+			<div class="input-group-prepend">
+				<select name="searchFor" id="searchFor" class="custom-select">
+					<option selected disabled>Search for</option>
+					<option value="region">Region</option>
+					<option value="sequence">Sequence</option>
+				</select>
+			</div>
+			<input type="search" placeholder="Search" class="form-control" name="search" aria-label="Search">
+			<div class="input-group-append">
+				<button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+			</div>
+		</div>
+	</form>
+	<div class="table-responsive mb-3">
+		<table class="table table-striped table-bordered table-hover mt-5">
+			<thead class="thead-dark">
+				<th scope="col">Region</th>
+				<th scope="col">Sequence</th>
+				<th scope="col">Sites/Articles</th>
+				<th scope="col">Alignment Results</th>
+				<th scope="col">Notes</th>
+				<th scope="col">Primers</th>
+				<th scope="col">Amplified Sequence</th>
+			</thead>
+			<tbody>
+				<% for(i in data.docs) { %>
+				<tr>
+					<th scope="row"><%= data.docs[i].region %></th>
+					<td>
+						<a class="nav-link" href="#!" data-toggle="modal" data-target="#showSequence">Show</a>
+						<div class="modal fade" id="showSequence" tabindex="-1" role="dialog"
+							aria-labelledby="showSequenceTitle" aria-hidden="true">
+							<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title" id="showSequenceTitle">Sequence</h5>
+										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+									<div class="modal-body">
+										<%= data.docs[i].sequence %>
+									</div>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary"
+											data-dismiss="modal">Close</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</td>
+					<td>
+						<% for(let j = 0; j < data.docs[i].articles.length; j++) { %>
+						<% if (data.docs[i].articles[j].pdf) { %>
+						<a href="/download/<%= data.docs[i].articles[j].link %>"
+							target="_blank"><%= data.docs[i].articles[j].name %></a>
+						<% } else { %>
+						<a href="<%= data.docs[i].articles[j].link %>"
+							target="_blank"><%= data.docs[i].articles[j].name %></a>
+						<% } %>
+						<% if (j != data.docs[i].articles.length -1) { %>
+						<hr>
+						<% } %>
+						<% } %>
+					</td>
+					<td>
+						<a class="nav-link" href="#!" data-toggle="modal" data-target="#showAlignmentResults">Show</a>
+						<div class="modal fade" id="showAlignmentResults" tabindex="-1" role="dialog"
+							aria-labelledby="showAlignmentResultsTitle" aria-hidden="true">
+							<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title" id="showAlignmentResultsTitle">Alignment Results</h5>
+										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+									<div class="modal-body">
+										<div class="table-responsive">
+											<table class="table table-striped table-bordered">
+												<thead class="thead-dark">
+													<th scope="col">BLAST</th>
+													<th scope="col">UNITE</th>
+													<th scope="col">Bold Systems</th>
+													<th scope="col">PhytophthoraDB</th>
+												</thead>
+												<tbody>
+													<tr>
+														<td><%= data.docs[i].blast %></td>
+														<td><%= data.docs[i].unite %></td>
+														<td><%= data.docs[i].bold %></td>
+														<td><%= data.docs[i].phyto %>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+									</div>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary"
+											data-dismiss="modal">Close</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</td>
+					<td>
+						<% for(let j = 0; j < data.docs[i].notes.length; j++) { %>
+						<%= data.docs[i].notes[j].note %>
+						<% if (j != data.docs[i].notes.length -1) { %>
+						<hr>
+						<% } %>
+						<% } %>
+					</td>
+					<td>
+						<a class="nav-link" href="#!" data-toggle="modal" data-target="#showRegionPrimers"
+							data-id="<%= data.docs[i].primers %>">Show</a>
+					</td>
+					<td>
+						<a class="nav-link" href="#!" data-toggle="modal" data-target="#showRegionAmpSequence">Show</a>
+						<div class="modal fade" id="showRegionAmpSequence" tabindex="-1" role="dialog"
+							aria-labelledby="showRegionAmpSequenceTitle" aria-hidden="true">
+							<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title" id="showRegionAmpSequenceTitle">Amplified Sequences</h5>
+										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+									<div class="modal-body">
+										<div class="table-responsive">
+											<table class="table table-striped table-bordered">
+												<thead class="thead-dark">
+													<th scope="col">Name</th>
+													<th scope="col">Sequence</th>
+													<th scope="col">BLAST</th>
+													<th scope="col">UNITE</th>
+													<th scope="col">Bold Systems</th>
+													<th scope="col">PhytophthoraDB</th>
+													<th scope="col">Notes</th>
+												</thead>
+												<tbody>
+													<% for(let j = 0; j < data.docs[i].amp_sequences.length; j++) { %>
+													<tr>
+														<td><%= data.docs[i].amp_sequences[j].name %></td>
+														<td><%= data.docs[i].amp_sequences[j].sequence %></td>
+														<td><%= data.docs[i].amp_sequences[j].blast %></td>
+														<td><%= data.docs[i].amp_sequences[j].unite %></td>
+														<td><%= data.docs[i].amp_sequences[j].bold %></td>
+														<td><%= data.docs[i].amp_sequences[j].phyto %></td>
+														<td><%= data.docs[i].amp_sequences[j].notes %></td>
+													</tr>
+													<% } %>
+												</tbody>
+											</table>
+										</div>
+									</div>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary"
+											data-dismiss="modal">Close</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</td>
+
+				</tr>
+				<% } %>
+			</tbody>
+		</table>
+	</div>
+
+	<% include ./partials/show_region_primers.ejs %>
+	<% include ./partials/_paginate.ejs %>
+	<a href="/" class="btn btn-primary my-3">Go back</a>
+</div>

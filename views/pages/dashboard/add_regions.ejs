@@ -1,0 +1,312 @@
+<%- contentFor('body') %>
+<% include ../partials/messages.ejs %>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+	<h1 class="h2">Insert target regions data</h1>
+</div>
+<div class="container">
+	<form id="add_region_form" action="/dashboard/add_regions" method="POST">
+		<div class="form-group">
+			<label for="inputRegion">Region</label>
+			<input type="text" class="form-control" name="region" id="inputRegion" placeholder="Region" required>
+		</div>
+		<div class="form-group">
+			<label for="inputSequence">Sequence</label>
+			<input type="text" class="form-control" name="sequence" id="inputSequence" placeholder="Sequence" required>
+		</div>
+		<div class="form-group">
+			<label>Articles (max. 5)</label>
+			<div id="articles" class="container">
+			</div>
+			<div class="d-flex">
+				<button type="button" class="btn btn-link btn-sm add_article">+ Add article</button>
+				<button type="button" class="btn btn-link btn-sm remove_article ml-auto" disabled>- Remove last
+					article</button>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="inputBlast">BLAST</label>
+			<input type="text" class="form-control" name="blast" id="inputBlast" placeholder="BLAST">
+		</div>
+		<div class="form-group">
+			<label for="inputUnite">UNITE</label>
+			<input type="text" class="form-control" name="unite" id="inputUnite" placeholder="UNITE">
+		</div>
+		<div class="form-group">
+			<label for="inputBold">Bold Systems</label>
+			<input type="text" class="form-control" name="bold" id="inputBold" placeholder="Bold Systems">
+		</div>
+		<div class="form-group">
+			<label for="inputPhyto">PhytophthoraDB</label>
+			<input type="text" class="form-control" name="phyto" id="inputPhyto" placeholder="PhytophthoraDB">
+		</div>
+		<div class="form-group">
+			<label>Notes (max. 5)</label>
+			<div class="container" id="notes" name="notes">
+			</div>
+			<div class="d-flex ">
+				<button type="button" class="btn btn-link btn-sm add_note">+ Add note</button>
+				<button type="button" class="btn btn-link btn-sm remove_note ml-auto" disabled>- Remove last
+					note</button>
+			</div>
+		</div>
+		<div class="form-group">
+			<label>Primers (max. 5)</label>
+			<div class="container" id="regionPrimers" name="regionPrimers">
+			</div>
+			<div class="d-flex ">
+				<button type="button" class="btn btn-link btn-sm add_region_primer">+ Add primer</button>
+				<button type="button" class="btn btn-link btn-sm remove_region_primer ml-auto" disabled>- Remove last
+					primer</button>
+			</div>
+			<div class="form-group">
+				<label>Amplified Sequence (max. 5)</label>
+				<div class="container" id="regionAmpSequences" name="regionAmpSequences">
+				</div>
+				<div class="d-flex ">
+					<button type="button" class="btn btn-link btn-sm add_region_ampSequence">+ Add Amplified
+						Sequence</button>
+					<button type="button" class="btn btn-link btn-sm remove_region_ampSequence ml-auto" disabled>-
+						Remove last
+						Amplified Sequence</button>
+				</div>
+			</div>
+		</div>
+		<input class="btn btn-primary my-3" type="submit" value="Insert region">
+	</form>
+	<a href="/dashboard" class="btn btn-primary my-3">Go back</a>
+</div>
+
+<%- contentFor('scripts') %>
+<script type="text/javascript">
+	$(document).ready(() => {
+		let maxFields = 5;
+		let minFields = 0;
+		let articles = $('#articles');
+		let notes = $('#notes');
+
+		let add_article = $('.add_article');
+		let remove_article = $('.remove_article');
+		let add_note = $('.add_note');
+		let remove_note = $('.remove_note');
+
+		let article_count = articles.children().length;
+		let note_count = notes.children().length;
+
+		let region_primers = $('#regionPrimers');
+		let region_ampSequences = $('#regionAmpSequences');
+
+		let add_region_primer = $('.add_region_primer');
+		let remove_region_primer = $('.remove_region_primer');
+		let add_region_ampSequence = $('.add_region_ampSequence');
+		let remove_region_ampSequence = $('.remove_region_ampSequence');
+
+
+		let region_primers_count = region_primers.children().length;
+		let region_ampSequence_count = region_ampSequences.children().length;
+
+		const showHideFields = () => {
+			for (let i = 1; i <= article_count; i++) {
+				let checked = $(`input[name=customRadio${i}]:checked`, '#add_region_form').val();
+				if (checked == 'link') {
+					$(`#linkInput${i}`).show();
+					$(`#pdfInput${i}`).hide();
+				} else if (checked == 'pdf') {
+					$(`#linkInput${i}`).hide();
+					$(`#pdfInput${i}`).show();
+				}
+			}
+		};
+
+		$(articles).ready(() => {
+			showHideFields();
+		});
+
+		$(articles).change(() => {
+			showHideFields();
+		});
+
+		$(add_article).click(e => {
+			e.preventDefault();
+			if (article_count < maxFields) {
+				article_count++;
+				remove_article.attr('disabled', false);
+				$(articles).append(` <div id="article${article_count}">
+				<label for="inputArticle${article_count}">Article
+											${article_count}</label>
+											<input type="text" class="form-control" name="article"
+												id="inputArticle${article_count}" placeholder="Name">
+											<div class="form-row">
+												<div class="col-3">
+													<div class="custom-control custom-radio mt-3">
+														<input type="radio" id="isLink${article_count}"
+															name="customRadio${article_count}" value="link"
+															class="custom-control-input radio_toggle"
+															checked>
+														<label class="custom-control-label"
+															for="isLink${article_count}">Link</label>
+													</div>
+													<div class="custom-control custom-radio mt-3">
+														<input type="radio" id="isPDF${article_count}"
+															name="customRadio${article_count}" value="pdf"
+															class="custom-control-input radio_toggle">
+														<label class="custom-control-label"
+															for="isPDF${article_count}">PDF</label>
+													</div>
+												</div>
+												<div class="col-9 mt-3">
+													<div id="linkInput${article_count}" class="form-group">
+														<label for="inputLink${article_count}">Link</label>
+														<input type="text" class="form-control" name="link"
+															id="inputLink${article_count}" placeholder="Link">
+													</div>
+													<div id="pdfInput${article_count}" class="form-group">
+														<div class="input-group mb-1">
+															<div class="input-group-prepend">
+																<label class="input-group-text"
+																	for="pdfSelect">PDF</label>
+															</div>
+															<select class="custom-select"
+															size="2" name="pdf" id="pdfSelect${article_count}">
+																<option value="#!" selected>Choose a pdf...</option>
+																<% if(pdfList != undefined) { %>
+																<% for(let i = 0; i < pdfList.length; i++) { %>
+																<option value="<%= pdfList[i].Key.replace("articles/", "") %>"><%= pdfList[i].Key.replace("articles/", "") %></option>
+																<% } %>
+																<% } %>
+															</select>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+											`);
+			}
+			if (article_count >= maxFields) {
+				add_article.attr('disabled', true);
+			}
+			showHideFields();
+		});
+
+		$(remove_article).click(e => {
+			e.preventDefault();
+			if (article_count > minFields) {
+				article_count--;
+				$(`#article${article_count + 1}`).remove();
+				add_article.attr('disabled', false);
+			}
+			if (article_count == minFields) {
+				remove_article.attr('disabled', true);
+			}
+		});
+
+		$(add_note).click(e => {
+			e.preventDefault();
+			if (note_count < maxFields) {
+				remove_note.attr('disabled', false);
+				note_count++;
+				$(notes).append(`<div id="note${note_count}"><label for="inputNotes${note_count}">Note ${note_count}</label>
+					<input type="text" class="form-control" name="note" id="inputNotes${note_count}" placeholder="Note"></div>`);
+			}
+			if (note_count >= maxFields) {
+				add_note.attr('disabled', true);
+			}
+		});
+
+		$(remove_note).click(e => {
+			e.preventDefault();
+			if (note_count > minFields) {
+				note_count--;
+				$(`#note${note_count + 1}`).remove();
+				add_note.attr('disabled', false);
+			}
+			if (note_count == minFields) {
+				remove_note.attr('disabled', true);
+			}
+		});
+
+		$(add_region_primer).click(e => {
+			e.preventDefault();
+			if (region_primers_count < maxFields) {
+				region_primers_count++;
+				remove_region_primer.attr('disabled', false);
+				$(region_primers).append(`<div id="regionPrimer${region_primers_count}">
+				<label for="inputPrimerName${region_primers_count}">Primer ${region_primers_count}</label>
+				<input type="text" class="form-control mb-3" name="primerName" id="inputPrimerName${region_primers_count}"
+					placeholder="Name" required>
+				<label for="inputPrimerSequence${region_primers_count}">Sequence</label>
+				<input type="text" class="form-control mb-3" name="primerSequence"
+					id="inputPrimerSequence${region_primers_count}" placeholder="Sequence" required>
+				<label for="inputPrimerBlast${region_primers_count}">BLAST</label>
+				<input type="text" class="form-control mb-3" name="primerBlast" id="inputPrimerBlast${region_primers_count}"
+					placeholder="BLAST">
+				<label for="inputPrimerNote">Note</label>
+				<input type="text" class="form-control mb-3" name="primerNote" id="inputPrimerNote" placeholder="Note">
+			</div>`);
+			}
+			if (region_primers_count >= maxFields) {
+				add_region_primer.attr('disabled', true);
+			}
+		});
+
+		$(remove_region_primer).click(e => {
+			e.preventDefault();
+			if (region_primers_count > minFields) {
+				region_primers_count--;
+				$(`#regionPrimer${region_primers_count + 1}`).remove();
+				add_region_primer.attr('disabled', false);
+			}
+			if (region_primers_count == minFields) {
+				remove_region_primer.attr('disabled', true);
+			}
+		});
+
+		$(add_region_ampSequence).click(e => {
+			e.preventDefault();
+			if (region_ampSequence_count < maxFields) {
+				region_ampSequence_count++;
+				remove_region_ampSequence.attr('disabled', false);
+				$(region_ampSequences).append(`<div id="regionAmpSequence${region_ampSequence_count}">
+				<label for="inputAmpSequenceName${region_ampSequence_count}">Amp. Sequence ${region_ampSequence_count}</label>
+				<input type="text" class="form-control mb-3" name="ampSequenceName"
+					id="inputAmpSequenceName${region_ampSequence_count}" placeholder="Name" required>
+				<label for="inputAmpSequenceSequence${region_ampSequence_count}">Sequence</label>
+				<input type="text" class="form-control mb-3" name="ampSequenceSequence"
+					id="inputAmpSequenceSequence${region_ampSequence_count}" placeholder="Sequence" required>
+				<label for="inputAmpSequenceBlast${region_ampSequence_count}">BLAST</label>
+				<input type="text" class="form-control mb-3" name="ampSequenceBlast"
+					id="inputAmpSequenceBlast${region_ampSequence_count}" placeholder="BLAST">
+	
+				<label for="inputAmpSequenceUnite${region_ampSequence_count}">UNITE</label>
+				<input type="text" class="form-control mb-3" name="ampSequenceUnite"
+					id="inputAmpSequenceUnite${region_ampSequence_count}" placeholder="UNITE">
+	
+				<label for="inputAmpSequenceBold${region_ampSequence_count}">Bold Systems</label>
+				<input type="text" class="form-control mb-3" name="ampSequenceBold"
+					id="inputAmpSequenceBold${region_ampSequence_count}" placeholder="Bold Systems">
+	
+				<label for="inputAmpSequencePhyto${region_ampSequence_count}">PhytophthoraDB</label>
+				<input type="text" class="form-control mb-3" name="ampSequencePhyto"
+					id="inputAmpSequencePhyto${region_ampSequence_count}" placeholder="PhytophthoraDB">
+	
+				<label for="inputAmpSequenceNote">Note</label>
+				<input type="text" class="form-control mb-3" name="ampSequenceNote" id="inputAmpSequenceNote" placeholder="Note">
+			</div>`);
+			}
+			if (region_ampSequence_count >= maxFields) {
+				add_region_ampSequence.attr('disabled', true);
+			}
+		});
+
+		$(remove_region_ampSequence).click(e => {
+			e.preventDefault();
+			if (region_ampSequence_count > minFields) {
+				region_ampSequence_count--;
+				$(`#regionAmpSequence${region_ampSequence_count + 1}`).remove();
+				add_region_ampSequence.attr('disabled', false);
+			}
+			if (region_ampSequence_count == minFields) {
+				remove_region_ampSequence.attr('disabled', true);
+			}
+		});
+	});
+</script>

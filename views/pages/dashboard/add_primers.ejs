@@ -49,13 +49,25 @@
 		let minFields = 0;
 		let articles = $('#articles');
 		let notes = $('#notes');
+
+		let region_primers = $('#regionPrimers');
+		let region_ampSequences = $('#regionAmpSequences');
+
 		let add_article = $('.add_article');
 		let remove_article = $('.remove_article');
 		let add_note = $('.add_note');
 		let remove_note = $('.remove_note');
 
+		let add_region_primer = $('.add_region_primer');
+		let remove_region_primer = $('.remove_region_primer');
+		let add_region_ampSequence = $('.add_region_ampSequence');
+		let remove_region_ampSequence = $('.remove_region_ampSequence');
+
 		let article_count = articles.children().length;
 		let note_count = notes.children().length;
+
+		let region_primers_count = region_primers.children().length;
+		let region_ampSequence_count = region_ampSequences.children().length;
 
 		const showHideFields = () => {
 			for (let i = 1; i <= article_count; i++) {
@@ -123,7 +135,7 @@
 																<option value="#!" selected>Choose a pdf...</option>
 																<% if(pdfList != undefined) { %>
 																<% for(let i = 0; i < pdfList.length; i++) { %>
-																<option value="<%=pdfList[i].ETag %>"><%= pdfList[i].Key.replace("articles/", "") %></option>
+																<option value="<%= pdfList[i].Key.replace("articles/", "") %>"><%= pdfList[i].Key.replace("articles/", "") %></option>
 																<% } %>
 																<% } %>
 															</select>
@@ -146,7 +158,7 @@
 				article_count--;
 				$(`#article${article_count + 1}`).remove();
 				add_article.attr('disabled', false);
-			};
+			}
 			if (article_count == minFields) {
 				remove_article.attr('disabled', true);
 			}
@@ -171,7 +183,7 @@
 				note_count--;
 				$(`#note${note_count + 1}`).remove();
 				add_note.attr('disabled', false);
-			};
+			}
 			if (note_count == minFields) {
 				remove_note.attr('disabled', true);
 			}
