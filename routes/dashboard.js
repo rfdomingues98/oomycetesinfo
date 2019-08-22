@@ -127,7 +127,7 @@ router.post('/add_primers', ensureAuthenticated, (req, res, next) => {
 					article[j] = "Link";
 				}
 				if (radio == 'link') {
-					if (link[j] != '#!') {
+					if (link[j] != '#!' && link[j] != undefined) {
 						if (checkDuplicate(link, link[j]) > 1) {
 							req.flash('warning_msg', 'Duplicate articles are not allowed!');
 							res.redirect('/dashboard/add_primers');
@@ -140,7 +140,7 @@ router.post('/add_primers', ensureAuthenticated, (req, res, next) => {
 					};
 					articles.push(objArticle);
 				} else if (radio == 'pdf') {
-					if (pdf[j] != '#!') {
+					if (pdf[j] != '#!' && pdf[j] != undefined) {
 						if (checkDuplicate(pdf, pdf[j]) > 1) {
 							req.flash('warning_msg', 'Duplicate articles are not allowed!');
 							res.redirect('/dashboard/add_primers');
@@ -295,7 +295,7 @@ router.post('/add_regions', ensureAuthenticated, (req, res) => {
 					article[j] = "Link";
 				}
 				if (radio == 'link') {
-					if (link[j] != '#!') {
+					if (link[j] != '#!' && link[j] != undefined) {
 						if (checkDuplicate(link, link[j]) > 1) {
 							req.flash('warning_msg', 'Duplicate articles are not allowed!');
 							res.redirect('/dashboard/add_primers');
@@ -308,7 +308,7 @@ router.post('/add_regions', ensureAuthenticated, (req, res) => {
 					};
 					articles.push(objArticle);
 				} else if (radio == 'pdf') {
-					if (pdf[j] != '#!') {
+					if (pdf[j] != '#!' && pdf[j] != undefined) {
 						if (checkDuplicate(pdf, pdf[j]) > 1) {
 							req.flash('warning_msg', 'Duplicate articles are not allowed!');
 							res.redirect('/dashboard/add_primers');
@@ -518,7 +518,7 @@ router.post('/edit/:id', ensureAuthenticated, (req, res) => {
 			article[j] = "Link";
 		}
 		if (radio == 'link') {
-			if (link[j] != '#!') {
+			if (link[j] != '#!' && link[j] != undefined) {
 				if (checkDuplicate(link, link[j]) > 1) {
 					req.flash('warning_msg', 'Duplicate articles are not allowed!');
 					res.redirect('/dashboard/edit/' + req.params.id);
@@ -531,7 +531,7 @@ router.post('/edit/:id', ensureAuthenticated, (req, res) => {
 			};
 			articles.push(objArticle);
 		} else if (radio == 'pdf') {
-			if (pdf[j] != '#!') {
+			if (pdf[j] != '#!' && pdf[j] != undefined) {
 				if (checkDuplicate(pdf, pdf[j]) > 1) {
 					req.flash('warning_msg', 'Duplicate articles are not allowed!');
 					res.redirect('/dashboard/edit/' + req.params.id);

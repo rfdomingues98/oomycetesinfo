@@ -42,6 +42,7 @@
 	var id;
 	$('#showRegionPrimers').on('show.bs.modal', (e) => {
 		id = $(e.relatedTarget).data('id');
+		id = id.replace('_id', 'id');
 		eval('var obj=' + id);
 		console.log(obj.primer);
 	})
