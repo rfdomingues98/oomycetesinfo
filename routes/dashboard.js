@@ -127,31 +127,37 @@ router.post('/add_primers', ensureAuthenticated, (req, res, next) => {
 					article[j] = "Link";
 				}
 				if (radio == 'link') {
-					if (link[j] != '#!' && link[j] != undefined) {
-						if (checkDuplicate(link, link[j]) > 1) {
-							req.flash('warning_msg', 'Duplicate articles are not allowed!');
-							res.redirect('/dashboard/add_primers');
+					if (link != undefined) {
+
+						if (link[j] != '#!' && link[j] != undefined) {
+							if (checkDuplicate(link, link[j]) > 1) {
+								req.flash('warning_msg', 'Duplicate articles are not allowed!');
+								res.redirect('/dashboard/add_primers');
+							}
 						}
+						let objArticle = {
+							'name': article[j],
+							'pdf': false,
+							'link': link[j]
+						};
+						articles.push(objArticle);
 					}
-					let objArticle = {
-						'name': article[j],
-						'pdf': false,
-						'link': link[j]
-					};
-					articles.push(objArticle);
 				} else if (radio == 'pdf') {
-					if (pdf[j] != '#!' && pdf[j] != undefined) {
-						if (checkDuplicate(pdf, pdf[j]) > 1) {
-							req.flash('warning_msg', 'Duplicate articles are not allowed!');
-							res.redirect('/dashboard/add_primers');
+					if (pdf != undefined) {
+
+						if (pdf[j] != '#!' && pdf[j] != undefined) {
+							if (checkDuplicate(pdf, pdf[j]) > 1) {
+								req.flash('warning_msg', 'Duplicate articles are not allowed!');
+								res.redirect('/dashboard/add_primers');
+							}
 						}
+						let objArticle = {
+							'name': article[j],
+							'pdf': true,
+							'link': pdf[j]
+						};
+						articles.push(objArticle);
 					}
-					let objArticle = {
-						'name': article[j],
-						'pdf': true,
-						'link': pdf[j]
-					};
-					articles.push(objArticle);
 				}
 				if (note != undefined) {
 					if (note[j])
@@ -295,31 +301,37 @@ router.post('/add_regions', ensureAuthenticated, (req, res) => {
 					article[j] = "Link";
 				}
 				if (radio == 'link') {
-					if (link[j] != '#!' && link[j] != undefined) {
-						if (checkDuplicate(link, link[j]) > 1) {
-							req.flash('warning_msg', 'Duplicate articles are not allowed!');
-							res.redirect('/dashboard/add_primers');
+					if (link != undefined) {
+
+						if (link[j] != '#!' && link[j] != undefined) {
+							if (checkDuplicate(link, link[j]) > 1) {
+								req.flash('warning_msg', 'Duplicate articles are not allowed!');
+								res.redirect('/dashboard/add_primers');
+							}
 						}
+						let objArticle = {
+							'name': article[j],
+							'pdf': false,
+							'link': link[j]
+						};
+						articles.push(objArticle);
 					}
-					let objArticle = {
-						'name': article[j],
-						'pdf': false,
-						'link': link[j]
-					};
-					articles.push(objArticle);
 				} else if (radio == 'pdf') {
-					if (pdf[j] != '#!' && pdf[j] != undefined) {
-						if (checkDuplicate(pdf, pdf[j]) > 1) {
-							req.flash('warning_msg', 'Duplicate articles are not allowed!');
-							res.redirect('/dashboard/add_primers');
+					if (pdf != undefined) {
+
+						if (pdf[j] != '#!' && pdf[j] != undefined) {
+							if (checkDuplicate(pdf, pdf[j]) > 1) {
+								req.flash('warning_msg', 'Duplicate articles are not allowed!');
+								res.redirect('/dashboard/add_primers');
+							}
 						}
+						let objArticle = {
+							'name': article[j],
+							'pdf': true,
+							'link': pdf[j]
+						};
+						articles.push(objArticle);
 					}
-					let objArticle = {
-						'name': article[j],
-						'pdf': true,
-						'link': pdf[j]
-					};
-					articles.push(objArticle);
 				}
 
 				if (note != undefined) {
@@ -518,31 +530,35 @@ router.post('/edit/:id', ensureAuthenticated, (req, res) => {
 			article[j] = "Link";
 		}
 		if (radio == 'link') {
-			if (link[j] != '#!' && link[j] != undefined) {
-				if (checkDuplicate(link, link[j]) > 1) {
-					req.flash('warning_msg', 'Duplicate articles are not allowed!');
-					res.redirect('/dashboard/edit/' + req.params.id);
+			if (link != undefined) {
+				if (link[j] != '#!' && link[j] != undefined) {
+					if (checkDuplicate(link, link[j]) > 1) {
+						req.flash('warning_msg', 'Duplicate articles are not allowed!');
+						res.redirect('/dashboard/edit/' + req.params.id);
+					}
+					let objArticle = {
+						'name': article[j],
+						'pdf': false,
+						'link': link[j]
+					};
+					articles.push(objArticle);
 				}
 			}
-			let objArticle = {
-				'name': article[j],
-				'pdf': false,
-				'link': link[j]
-			};
-			articles.push(objArticle);
 		} else if (radio == 'pdf') {
-			if (pdf[j] != '#!' && pdf[j] != undefined) {
-				if (checkDuplicate(pdf, pdf[j]) > 1) {
-					req.flash('warning_msg', 'Duplicate articles are not allowed!');
-					res.redirect('/dashboard/edit/' + req.params.id);
+			if (pdf != undefined) {
+				if (pdf[j] != '#!' && pdf[j] != undefined) {
+					if (checkDuplicate(pdf, pdf[j]) > 1) {
+						req.flash('warning_msg', 'Duplicate articles are not allowed!');
+						res.redirect('/dashboard/edit/' + req.params.id);
+					}
 				}
+				let objArticle = {
+					'name': article[j],
+					'pdf': true,
+					'link': pdf[j]
+				};
+				articles.push(objArticle);
 			}
-			let objArticle = {
-				'name': article[j],
-				'pdf': true,
-				'link': pdf[j]
-			};
-			articles.push(objArticle);
 		}
 		if (note != undefined) {
 			if (note[j])
