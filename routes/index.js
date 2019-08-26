@@ -153,4 +153,12 @@ router.post('/regions/search', (req, res) => {
 	}
 });
 
+router.post('/getRegion/:id', (req, res) => {
+	Region.findOne({ _id: req.params.id }, (err, data) => {
+		if (err)
+			return console.log(err);
+		res.json(data);
+	});
+});
+
 module.exports = router;

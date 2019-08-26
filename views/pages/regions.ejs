@@ -44,27 +44,8 @@
 				<tr>
 					<th scope="row"><%= data.docs[i].region %></th>
 					<td>
-						<a class="nav-link" href="#!" data-toggle="modal" data-target="#showSequence">Show</a>
-						<div class="modal fade" id="showSequence" tabindex="-1" role="dialog"
-							aria-labelledby="showSequenceTitle" aria-hidden="true">
-							<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h5 class="modal-title" id="showSequenceTitle">Sequence</h5>
-										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-											<span aria-hidden="true">&times;</span>
-										</button>
-									</div>
-									<div class="modal-body">
-										<%= data.docs[i].sequence %>
-									</div>
-									<div class="modal-footer">
-										<button type="button" class="btn btn-secondary"
-											data-dismiss="modal">Close</button>
-									</div>
-								</div>
-							</div>
-						</div>
+						<a class="nav-link" href="#!" data-toggle="modal" data-target="#showSequence"
+							data-id="<%= data.docs[i].sequence %>">Show</a>
 					</td>
 					<td>
 						<% for(let j = 0; j < data.docs[i].articles.length; j++) { %>
@@ -81,44 +62,8 @@
 						<% } %>
 					</td>
 					<td>
-						<a class="nav-link" href="#!" data-toggle="modal" data-target="#showAlignmentResults">Show</a>
-						<div class="modal fade" id="showAlignmentResults" tabindex="-1" role="dialog"
-							aria-labelledby="showAlignmentResultsTitle" aria-hidden="true">
-							<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h5 class="modal-title" id="showAlignmentResultsTitle">Alignment Results</h5>
-										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-											<span aria-hidden="true">&times;</span>
-										</button>
-									</div>
-									<div class="modal-body">
-										<div class="table-responsive">
-											<table class="table table-striped table-bordered">
-												<thead class="thead-dark">
-													<th scope="col">BLAST</th>
-													<th scope="col">UNITE</th>
-													<th scope="col">Bold Systems</th>
-													<th scope="col">PhytophthoraDB</th>
-												</thead>
-												<tbody>
-													<tr>
-														<td><%= data.docs[i].blast %></td>
-														<td><%= data.docs[i].unite %></td>
-														<td><%= data.docs[i].bold %></td>
-														<td><%= data.docs[i].phyto %>
-													</tr>
-												</tbody>
-											</table>
-										</div>
-									</div>
-									<div class="modal-footer">
-										<button type="button" class="btn btn-secondary"
-											data-dismiss="modal">Close</button>
-									</div>
-								</div>
-							</div>
-						</div>
+						<a class="nav-link" href="#!" data-toggle="modal" data-target="#showAlignmentResults"
+							data-id="<%= data.docs[i]._id %>">Show</a>
 					</td>
 					<td>
 						<% for(let j = 0; j < data.docs[i].notes.length; j++) { %>
@@ -129,65 +74,80 @@
 						<% } %>
 					</td>
 					<td>
-						<a class="nav-link" href="#!" data-toggle="modal" data-target="#showRegionPrimers"
-							data-id="<%= data.docs[i].primers %>">Show</a>
+						<a class=" nav-link" href="#!" data-toggle="modal" data-target="#showRegionPrimers"
+							data-id="<%= data.docs[i]._id %>">Show</a>
 					</td>
 					<td>
-						<a class="nav-link" href="#!" data-toggle="modal" data-target="#showRegionAmpSequence">Show</a>
-						<div class="modal fade" id="showRegionAmpSequence" tabindex="-1" role="dialog"
-							aria-labelledby="showRegionAmpSequenceTitle" aria-hidden="true">
-							<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h5 class="modal-title" id="showRegionAmpSequenceTitle">Amplified Sequences</h5>
-										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-											<span aria-hidden="true">&times;</span>
-										</button>
-									</div>
-									<div class="modal-body">
-										<div class="table-responsive">
-											<table class="table table-striped table-bordered">
-												<thead class="thead-dark">
-													<th scope="col">Name</th>
-													<th scope="col">Sequence</th>
-													<th scope="col">BLAST</th>
-													<th scope="col">UNITE</th>
-													<th scope="col">Bold Systems</th>
-													<th scope="col">PhytophthoraDB</th>
-													<th scope="col">Notes</th>
-												</thead>
-												<tbody>
-													<% for(let j = 0; j < data.docs[i].amp_sequences.length; j++) { %>
-													<tr>
-														<td><%= data.docs[i].amp_sequences[j].name %></td>
-														<td><%= data.docs[i].amp_sequences[j].sequence %></td>
-														<td><%= data.docs[i].amp_sequences[j].blast %></td>
-														<td><%= data.docs[i].amp_sequences[j].unite %></td>
-														<td><%= data.docs[i].amp_sequences[j].bold %></td>
-														<td><%= data.docs[i].amp_sequences[j].phyto %></td>
-														<td><%= data.docs[i].amp_sequences[j].notes %></td>
-													</tr>
-													<% } %>
-												</tbody>
-											</table>
-										</div>
-									</div>
-									<div class="modal-footer">
-										<button type="button" class="btn btn-secondary"
-											data-dismiss="modal">Close</button>
-									</div>
-								</div>
-							</div>
-						</div>
+						<a class="nav-link" href="#!" data-toggle="modal" data-target="#showRegionAmpSequence"
+							data-id="<%= data.docs[i]._id %>">Show</a>
 					</td>
-
 				</tr>
 				<% } %>
 			</tbody>
 		</table>
 	</div>
 
+	<% include ./partials/show_region_sequence.ejs %>
+	<% include ./partials/show_region_alignment.ejs %>
 	<% include ./partials/show_region_primers.ejs %>
+	<% include ./partials/show_region_ampSequences.ejs %>
 	<% include ./partials/_paginate.ejs %>
 	<a href="/" class="btn btn-primary my-3">Go back</a>
 </div>
+
+<%- contentFor('scripts') %>
+<script>
+	$('#showAlignmentResults').on('show.bs.modal', (e) => {
+		let id = $(e.relatedTarget).data('id');
+		$.post("/getRegion/" + id, {
+			search: id
+		}, (data, status) => {
+			if (status == 'success') {
+				$('#region_alignment').append('<tr><td>' + data.blast + '</td><td>' + data.unite + '</td><td>' + data.bold + '</td><td>' + data.phyto + '</td></tr>');
+			}
+		})
+	})
+	$('#showAlignmentResults').on('hide.bs.modal', (e) => {
+		$('#region_alignment').empty();
+	})
+
+	$('#showRegionPrimers').on('show.bs.modal', (e) => {
+		let id = $(e.relatedTarget).data('id');
+		$.post("/getRegion/" + id, {
+			search: id
+		}, (data, status) => {
+			if (status == 'success') {
+				for (let i = 0; i < data.primers.length; i++) {
+					$('#region_primers').append('<tr><td>' + data.primers[i].primer + '</td><td>' + data.primers[i].sequence + '</td><td>' + data.primers[i].blast + '</td><td>' + data.primers[i].notes + '</td></tr>');
+				}
+			}
+		})
+	})
+	$('#showRegionPrimers').on('hide.bs.modal', (e) => {
+		$('#region_primers').empty();
+	})
+
+	$('#showRegionAmpSequence').on('show.bs.modal', (e) => {
+		let id = $(e.relatedTarget).data('id');
+		$.post("/getRegion/" + id, {
+			search: id
+		}, (data, status) => {
+			if (status == 'success') {
+				for (let i = 0; i < data.amp_sequences.length; i++) {
+					$('#region_ampsequences').append('<tr><td>' + data.amp_sequences[i].name + '</td><td>' + data.amp_sequences[i].sequence + '</td><td>' + data.amp_sequences[i].blast + '</td><td>' + data.amp_sequences[i].unite + '</td><td>' + data.amp_sequences[i].bold + '</td><td>' + data.amp_sequences[i].phyto + '</td><td>' + data.amp_sequences[i].notes + '</td></tr>');
+				}
+			}
+		})
+	})
+	$('#showRegionAmpSequence').on('hide.bs.modal', (e) => {
+		$('#region_ampsequences').empty();
+	})
+
+	$('#showSequence').on('show.bs.modal', (e) => {
+		let id = $(e.relatedTarget).data('id');
+		$('#region_sequence').append('<p>' + id + '</p>');
+	})
+	$('#showSequence').on('hide.bs.modal', (e) => {
+		$('#region_sequence').empty();
+	})
+</script>

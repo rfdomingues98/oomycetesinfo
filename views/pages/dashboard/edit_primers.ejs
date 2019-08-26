@@ -4,7 +4,7 @@
 	<h1 class="h2">Edit primer data</h1>
 </div>
 <div class="container">
-	<form id="edit_primer_form" action="/dashboard/edit/<%= data._id %>" method="POST">
+	<form id="edit_primer_form" action="/dashboard/edit/primer/<%= data._id %>" method="POST">
 		<div class="form-group">
 			<label for="inputPrimer">Primer</label>
 			<input type="text" class="form-control" name="primer" value="<%= data.primer %>" id="inputPrimer"
@@ -64,7 +64,7 @@
 									<select class="custom-select" name="pdf" size="2" id="<%= 'pdfSelect'+(i+1) %>">
 										<option value="#!">Choose a pdf...</option>
 										<% for(let j = 0; j < pdfList.length; j++) { %>
-										<% if(data.articles[i].link == pdfList[j]) { %>
+										<% if(data.articles[i].link == pdfList[j].Key.replace("articles/", "")) { %>
 										<option value="<%=pdfList[j].Key.replace('articles/', '') %>" selected>
 											<%= pdfList[j].Key.replace("articles/", "") %></option>
 										<% } else { %>
