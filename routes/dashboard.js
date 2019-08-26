@@ -9,6 +9,7 @@ const crypto = require('crypto');
 
 const Primer = require('../models/primers');
 const Region = require('../models/regions');
+const Clustal = require('../models/clustal');
 
 const { ensureAuthenticated } = require('../config/auth');
 
@@ -426,11 +427,7 @@ router.post('/add_regions', ensureAuthenticated, (req, res) => {
 });
 
 router.get('/manage_primers', ensureAuthenticated, async (req, res) => {
-	const pdfDir = './articles/';
 	let pdfList = [];
-	fs.readdirSync(pdfDir).forEach(file => {
-		pdfList.push(file);
-	});
 
 	let page = req.query.page || 1;
 	let perPage = req.query.perPage || 5;
@@ -447,8 +444,7 @@ router.get('/manage_primers', ensureAuthenticated, async (req, res) => {
 	ctx = {
 		layout: 'layout_dashboard',
 		title: 'Manage Primers',
-		data: primers,
-		pdfList: pdfList.sort()
+		data: primers
 	};
 	res.render('./dashboard/manage_primers', ctx);
 });
@@ -838,6 +834,7 @@ router.get('/delete/primer/:id', ensureAuthenticated, (req, res, next) => {
 		}
 	});
 });
+
 router.get('/delete/region/:id', ensureAuthenticated, (req, res, next) => {
 	Region.findByIdAndDelete({ _id: req.params.id }, (err, result) => {
 		if (err) {
@@ -847,6 +844,19 @@ router.get('/delete/region/:id', ensureAuthenticated, (req, res, next) => {
 		} else {
 			req.flash('success_msg', 'Region deleted successfully!');
 			res.redirect('/dashboard/manage_regions');
+		}
+	});
+});
+
+router.get('/delete/clustal/:id', ensureAuthenticated, (req, res, next) => {
+	Clustal.findByIdAndDelete({ _id: req.params.id }, (err, result) => {
+		if (err) {
+			console.log(err);
+			req.flash('error', 'Failed to delete clustal!');
+			res.redirect('/dashboard/manage_clustal');
+		} else {
+			req.flash('success_msg', 'Clustal deleted successfully!');
+			res.redirect('/dashboard/manage_clustal');
 		}
 	});
 });
@@ -946,13 +956,118 @@ router.post('/upload_clustal', ensureAuthenticated, (req, res) => {
 	});
 });
 
-router.get('/clustal', ensureAuthenticated, (req, res) => {
-	let ctx = {
-		layout: 'layout_dashboard',
-		title: 'CLUSTAL Info'
+router.get('/manage_clustal', ensureAuthenticated, async (req, res) => {
+	let clustalList = [];
+
+	let page = req.query.page || 1;
+	let perPage = req.query.perPage || 5;
+
+	let maxPerPage = 10;
+	let options = {
+		page: parseInt(page, 10),
+		limit: parseInt(perPage, 10) > maxPerPage ? maxPerPage : parseInt(perPage, 10),
+		sort: { date: -1 }
 	};
 
-	res.render('./dashboard/clustal', ctx);
+	const clustal = await Clustal.paginate({}, options);
+
+	let ctx = {
+		layout: 'layout_dashboard',
+		title: 'CLUSTAL Data',
+		data: clustal
+	};
+	res.render('./dashboard/manage_clustal', ctx);
+});
+
+router.get('/add_clustal', ensureAuthenticated, (req, res) => {
+	let params = {
+		Bucket: process.env.AWS_BUCKET_NAME,
+		Prefix: 'clustal/'
+	};
+	s3.listObjectsV2(params, (err, data) => {
+		if (err)
+			return console.log(err);
+		data.Contents.shift();
+		let ctx = {
+			layout: 'layout_dashboard',
+			title: 'Insert CLUSTAL',
+			fileList: data.Contents
+		};
+		res.render('./dashboard/add_clustal', ctx);
+	});
+});
+
+router.post('/add_clustal', ensureAuthenticated, (req, res) => {
+	const { clustalName, clustalFile, note } = req.body;
+	if (!clustalName) {
+		req.flash('warning_msg', 'CLUSTAL name not filled!');
+		res.redirect('./dashboard/add_clustal');
+	} else {
+		let obj = new Clustal({
+			'file.name': clustalName,
+			'file.link': clustalFile,
+			note
+		});
+
+		obj
+			.save()
+			.then(() => {
+				req.flash('success_msg', 'Added CLUSTAL successfully!');
+				res.redirect('/dashboard/add_clustal');
+			})
+			.catch(err => {
+				console.log(err);
+			});
+	}
+});
+
+router.get('/edit/clustal/:id', ensureAuthenticated, (req, res) => {
+	Clustal.findById(req.params.id, (err, result) => {
+		if (err)
+			return console.log(err);
+
+		let params = {
+			Bucket: process.env.AWS_BUCKET_NAME,
+			Prefix: 'clustal/'
+		};
+		s3.listObjectsV2(params, (err, data) => {
+			if (err)
+				return console.log(err);
+			data.Contents.shift();
+			let ctx = {
+				layout: 'layout_dashboard',
+				title: 'CLUSTAL Data',
+				fileList: data.Contents,
+				data: result
+			};
+			res.render('./dashboard/edit_clustal', ctx);
+		});
+	});
+});
+
+router.post('/edit/clustal/:id', ensureAuthenticated, (req, res) => {
+	const { clustalName, clustalFile, note } = req.body;
+	if (!clustalName) {
+		req.flash('warning_msg', 'CLUSTAL name not filled!');
+		res.redirect('./dashboard/add_clustal');
+	} else {
+		let obj = {
+			'file.name': clustalName,
+			'file.link': clustalFile,
+			note
+		};
+
+		Clustal.findByIdAndUpdate(req.params.id, obj, { new: true }, (err, result) => {
+			if (err) {
+				console.log(err);
+				req.flash('warning_msg', 'Failed to update CLUSTAL!');
+				res.redirect('/dashboard/edit/clustal/' + req.params.id);
+			} else {
+				req.flash('success_msg', 'CLUSTAL updated successfully!');
+				res.redirect('/dashboard/manage_clustal');
+			}
+		})
+	}
 });
 
 module.exports = router;

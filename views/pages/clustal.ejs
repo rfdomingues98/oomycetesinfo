@@ -1,0 +1,32 @@
+<%- contentFor('header') %>
+<header>
+	<h1 class="page-title text-center mt-5"><%= title %></h1>
+</header>
+<%- contentFor('body') %>
+<div class="container">
+	<div class="table-responsive mb-3">
+		<table class="table table-striped table-bordered table-hover mt-5">
+			<thead class="thead-dark">
+				<th scope="col">CLUSTAL</th>
+				<th scope="col">Notes</th>
+			</thead>
+			<tbody>
+				<% if(data != undefined) { %>
+
+				<% for(let i = 0; i < data.docs.length; i++) { %>
+				<tr>
+					<td>
+						<a href="/download/clustal/<%= data.docs[i].file.link %>"><%= data.docs[i].file.name %></a>
+					</td>
+					<td>
+						<%= data.docs[i].note %>
+					</td>
+				</tr>
+				<% } %>
+				<% } %>
+			</tbody>
+		</table>
+	</div>
+	<% include ./partials/_paginate.ejs %>
+	<a href="/" class="btn btn-primary my-3">Go back</a>
+</div>

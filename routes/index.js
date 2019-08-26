@@ -7,6 +7,7 @@ const aws = require('aws-sdk');
 
 const Primer = require('../models/primers');
 const Region = require('../models/regions');
+const Clustal = require('../models/clustal');
 
 aws.config.update({
 	accessKeyId: process.env.AWS_ACCESS_KEY,
@@ -44,8 +45,24 @@ router.get('/primers', async (req, res, next) => {
 	res.render('primers', ctx);
 });
 
-router.get('/download/:id', (req, res) => {
+router.get('/download/article/:id', (req, res) => {
 	let key = 'articles/' + req.params.id;
+
+	let params = {
+		Bucket: process.env.AWS_BUCKET_NAME,
+		Key: key
+	};
+
+	res.attachment(key);
+	let fs = s3.getObject(params, (err, data) => {
+		if (err)
+			return console.log(err, err.stack);
+	}).createReadStream();
+	fs.pipe(res);
+});
+
+router.get('/download/clustal/:id', (req, res) => {
+	let key = 'clustal/' + req.params.id;
 
 	let params = {
 		Bucket: process.env.AWS_BUCKET_NAME,
@@ -159,6 +176,29 @@ router.post('/getRegion/:id', (req, res) => {
 			return console.log(err);
 		res.json(data);
 	});
+});
+
+router.get('/clustal', async (req, res) => {
+	let clustalList = [];
+
+	let page = req.query.page || 1;
+	let perPage = req.query.perPage || 5;
+
+	let maxPerPage = 10;
+	let options = {
+		page: parseInt(page, 10),
+		limit: parseInt(perPage, 10) > maxPerPage ? maxPerPage : parseInt(perPage, 10),
+		sort: { date: -1 }
+	};
+
+	const clustal = await Clustal.paginate({}, options);
+
+	let ctx = {
+		layout: 'layout',
+		title: 'CLUSTAL Data',
+		data: clustal
+	};
+	res.render('clustal', ctx);
 });
 
 module.exports = router;

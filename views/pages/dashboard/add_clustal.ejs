@@ -1,0 +1,33 @@
+<%- contentFor('body') %>
+<% include ../partials/messages.ejs %>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+	<h1 class="h2">Insert CLUSTAL data</h1>
+</div>
+<div class="container">
+	<form id="add_primer_form" action="/dashboard/add_clustal" method="POST">
+		<div class="form-group">
+			<label for="inputName">Name</label>
+			<input type="text" class="form-control" name="clustalName" id="inputName" placeholder="Name" required>
+		</div>
+		<div class="form-group">
+			<label for="clustalSelect">CLUSTAL file</label>
+			<select class="custom-select" size="2" name="clustalFile" id="clustalSelect">
+				<option value="#!" selected>Choose a CLUSTAL file...</option>
+				<% if(fileList != undefined) { %>
+				<% for(let i = 0; i < fileList.length; i++) { %>
+				<option value="<%= fileList[i].Key.replace("clustal/", "") %>">
+					<%= fileList[i].Key.replace("clustal/", "") %></option>
+				<% } %>
+				<% } %>
+			</select>
+		</div>
+		<div class="form-group">
+			<div id="note">
+				<label for="inputNote">Note</label>
+				<input type="text" class="form-control" name="note" id="inputNote" placeholder="Note">
+			</div>
+		</div>
+		<input class="btn btn-primary my-3" type="submit" value="Insert CLUSTAL">
+	</form>
+	<a href="/dashboard" class="btn btn-primary my-3">Go back</a>
+</div>

@@ -23,7 +23,7 @@
 			</div>
 			<input type="search" placeholder="Search" class="form-control" name="search" aria-label="Search">
 			<div class="input-group-append">
-				<button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+				<button class="btn btn-outline-success my-sm-0" type="submit">Search</button>
 			</div>
 		</div>
 	</form>
@@ -44,7 +44,7 @@
 					<td>
 						<% for(let j = 0; j < data.docs[i].articles.length; j++) { %>
 						<% if (data.docs[i].articles[j].pdf) { %>
-						<a href="/download/<%= data.docs[i].articles[j].link %>"
+						<a href="/download/article/<%= data.docs[i].articles[j].link %>"
 							target="_blank"><%= data.docs[i].articles[j].name %></a>
 						<% } else { %>
 						<a href="<%= data.docs[i].articles[j].link %>"
