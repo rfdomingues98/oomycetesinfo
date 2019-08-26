@@ -134,7 +134,7 @@
 		}, (data, status) => {
 			if (status == 'success') {
 				for (let i = 0; i < data.amp_sequences.length; i++) {
-					$('#region_ampsequences').append('<tr><td>' + data.amp_sequences[i].name + '</td><td>' + data.amp_sequences[i].sequence + '</td><td>' + data.amp_sequences[i].blast + '</td><td>' + data.amp_sequences[i].unite + '</td><td>' + data.amp_sequences[i].bold + '</td><td>' + data.amp_sequences[i].phyto + '</td><td>' + data.amp_sequences[i].notes + '</td></tr>');
+					$('#region_ampsequences').append('<tr><td>' + data.amp_sequences[i].name + '</td><td  style="max-width: 300px; word-wrap: break-word;">' + data.amp_sequences[i].sequence + '</td><td>' + data.amp_sequences[i].blast + '</td><td>' + data.amp_sequences[i].unite + '</td><td>' + data.amp_sequences[i].boldsystems + '</td><td>' + data.amp_sequences[i].phytophthoradb + '</td><td style="min-width: 300px;">' + data.amp_sequences[i].notes + '</td></tr>');
 				}
 			}
 		})
