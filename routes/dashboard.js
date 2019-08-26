@@ -23,7 +23,7 @@ const s3 = new aws.S3();
 
 const upload_pdf = multer({
 	fileFilter: (req, file, cb) => {
-		fileCheck(file, cb);
+		fileCheckPdf(file, cb);
 	},
 	storage: multerS3({
 		s3: s3,
@@ -37,7 +37,23 @@ const upload_pdf = multer({
 	}
 }).single('pdfup');
 
-const fileCheck = (file, cb) => {
+const upload_clustal = multer({
+	fileFilter: (req, file, cb) => {
+		fileCheckClustal(file, cb);
+	},
+	storage: multerS3({
+		s3: s3,
+		bucket: process.env.AWS_BUCKET_NAME,
+		key: (req, file, cb) => {
+			cb(null, 'clustal/' + file.originalname);
+		}
+	}),
+	limits: {
+		fileSize: 10000000
+	}
+}).single('clustalup');
+
+const fileCheckPdf = (file, cb) => {
 	const filetypes = /pdf/;
 	const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
 	const mimetype = filetypes.test(file.mimetype);
@@ -46,6 +62,17 @@ const fileCheck = (file, cb) => {
 		return cb(null, true);
 	} else {
 		cb('File not supported! Only pdf allowed!');
+	}
+};
+const fileCheckClustal = (file, cb) => {
+	const filetypes = /html/;
+	const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+	const mimetype = filetypes.test(file.mimetype);
+
+	if (mimetype && extname) {
+		return cb(null, true);
+	} else {
+		cb('File not supported! Only html allowed!');
 	}
 };
 
