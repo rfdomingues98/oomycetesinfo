@@ -10,8 +10,8 @@ const regionsSchema = new Schema({
 	},
 	sequence: {
 		type: String,
-		unique: true,
-		required: true
+		required: true,
+		trim: true
 	},
 	articles: [
 		{

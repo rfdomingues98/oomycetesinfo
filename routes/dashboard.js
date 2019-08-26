@@ -21,7 +21,7 @@ aws.config.update({
 
 const s3 = new aws.S3();
 
-const upload = multer({
+const upload_pdf = multer({
 	fileFilter: (req, file, cb) => {
 		fileCheck(file, cb);
 	},
@@ -455,8 +455,8 @@ router.get('/manage_regions', ensureAuthenticated, async (req, res) => {
 	res.render('./dashboard/manage_regions', ctx);
 });
 
-router.post('/uploadpdf', ensureAuthenticated, (req, res) => {
-	upload(req, res, (err) => {
+router.post('/upload_pdf', ensureAuthenticated, (req, res) => {
+	upload_pdf(req, res, (err) => {
 		if (err) {
 			req.flash('error', err.message);
 			res.redirect('/dashboard');
@@ -900,6 +900,32 @@ router.post('/regions/search', (req, res) => {
 			res.render('./dashboard/manage_regions', ctx);
 		});
 	}
+});
+
+router.post('/upload_clustal', ensureAuthenticated, (req, res) => {
+	upload_clustal(req, res, (err) => {
+		if (err) {
+			req.flash('error', err.message);
+			res.redirect('/dashboard');
+		} else {
+			if (req.file == undefined) {
+				req.flash('error', 'No file selected!');
+				res.redirect('/dashboard');
+			} else {
+				req.flash('success_msg', 'File uploaded successfully!');
+				res.redirect('/dashboard');
+			}
+		}
+	});
+});
+
+router.get('/clustal', ensureAuthenticated, (req, res) => {
+	let ctx = {
+		layout: 'layout_dashboard',
+		title: 'CLUSTAL Info'
+	};
+
+	res.render('./dashboard/clustal', ctx);
 });
 
 module.exports = router;

@@ -1,28 +1,28 @@
-<div class="modal fade" id="addFileModal" tabindex="-1" role="dialog" aria-labelledby="addFileModalTitle"
+<div class="modal fade" id="addPdfFileModal" tabindex="-1" role="dialog" aria-labelledby="addPdfFileModalTitle"
 	aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="addFileModalTitle">Upload pdf file</h5>
+				<h5 class="modal-title" id="addPdfFileModalTitle">Upload pdf file</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
-			<form action="/dashboard/uploadpdf" method="POST" enctype="multipart/form-data">
+			<form action="/dashboard/upload_pdf" method="POST" enctype="multipart/form-data">
 				<div class="modal-body">
 					<p>Select pdf file you want to upload (make sure the file name is intuitive):</p>
 					<div class="input-group mb-3">
 						<div class="custom-file">
-							<input type="file" name="pdfup" class="custom-file-input" id="inputFile"
+							<input type="file" name="pdfup" class="custom-file-input" id="inputPdfFile"
 								aria-describedby="inputGroupFileAddon01">
-							<label id="fileLabel" class="custom-file-label overflow-hidden" for="inputFile">Choose
+							<label id="pdfFileLabel" class="custom-file-label overflow-hidden" for="inputFile">Choose
 								file</label>
 						</div>
 					</div>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-					<button type="submit" formaction="/dashboard/uploadpdf" class="btn btn-primary">Upload
+					<button type="submit" formaction="/dashboard/upload_pdf" class="btn btn-primary">Upload
 						file</button>
 				</div>
 			</form>
