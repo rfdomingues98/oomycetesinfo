@@ -6,7 +6,8 @@ const Schema = mongoose.Schema;
 const regionsSchema = new Schema({
 	region: {
 		type: String,
-		required: true
+		required: true,
+		trim: true
 	},
 	sequence: {
 		type: String,

@@ -15,6 +15,13 @@
 <% include ../partials/messages.ejs %>
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
 	<h1 class="h2">Manage target regions data</h1>
+	<div class="btn-toolbar mb-2 mb-md-0">
+		<label class="mr-2">Export as:</label>
+		<div class="btn-group mr-2">
+			<a href="/dashboard/export/json/regions" class="btn btn-sm btn-outline-success">JSON</a>
+			<a href="/dashboard/export/csv/regions" class="btn btn-sm btn-outline-success">CSV</a>
+		</div>
+	</div>
 </div>
 <div class="container-fluid">
 	<form id="search" action="/dashboard/regions/search" method="POST" class="form-inline my-2 my-lg-0">

@@ -6,12 +6,14 @@ const Schema = mongoose.Schema;
 const primersSchema = new Schema({
 	primer: {
 		type: String,
-		required: true
+		required: true,
+		trim: true
 	},
 	sequence: {
 		type: String,
 		unique: true,
-		required: true
+		required: true,
+		trim: true
 	},
 	articles: [
 		{

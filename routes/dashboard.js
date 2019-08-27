@@ -6,6 +6,7 @@ const multer = require('multer');
 const multerS3 = require('multer-s3');
 const path = require('path');
 const crypto = require('crypto');
+const { Parser } = require('json2csv');
 
 const Primer = require('../models/primers');
 const Region = require('../models/regions');
@@ -1066,7 +1067,119 @@ router.post('/edit/clustal/:id', ensureAuthenticated, (req, res) => {
 				req.flash('success_msg', 'CLUSTAL updated successfully!');
 				res.redirect('/dashboard/manage_clustal');
 			}
-		})
+		});
+	}
+});
+
+router.get('/export/csv/:type', ensureAuthenticated, (req, res) => {
+	if (req.params.type == 'primers') {
+		Primer.find().lean().exec((err, data) => {
+			if (err)
+				return console.log(err);
+			const fields = ['primer', 'sequence', 'articles.0.name', 'articles.1.name', 'articles.2.name', 'articles.3.name', 'articles.4.name', 'blast', 'notes.0.note', 'notes.1.note', 'notes.2.note', 'notes.3.note', 'notes.4.note'];
+			const opts = { fields, delimiter: ';', excelStrings: true };
+			try {
+				const parser = new Parser(opts);
+				const csv = parser.parse(data);
+				let fileName = 'primers-' + Date.now() + '.csv';
+				fs.writeFile(fileName, csv, (err) => {
+					if (err)
+						return console.log(err);
+					res.download(fileName, (err) => {
+						if (err)
+							return console.log(err);
+
+						fs.unlink(fileName, (err) => {
+							if (err)
+								return console.log(err);
+						});
+					});
+				});
+			} catch (e) {
+				console.log(e);
+			}
+		});
+	} else if (req.params.type == 'regions') {
+		Region.find().lean().exec((err, data) => {
+			if (err)
+				return console.log(err);
+			const fields = ['region', 'sequence', 'articles.0.name', 'articles.1.name', 'articles.2.name', 'articles.3.name', 'articles.4.name', 'blast', 'unite', 'bold', 'phyto', 'notes.0.note', 'notes.1.note', 'notes.2.note', 'notes.3.note', 'notes.4.note', 'primers.0.primer', 'primers.0.sequence', 'primers.0.blast', 'primers.0.notes', 'primers.1.primer', 'primers.1.sequence', 'primers.1.blast', 'primers.1.notes', 'primers.2.primer', 'primers.2.sequence', 'primers.2.blast', 'primers.2.notes', 'primers.3.primer', 'primers.3.sequence', 'primers.3.blast', 'primers.3.notes', 'primers.4.primer', 'primers.4.sequence', 'primers.4.blast', 'primers.4.notes', 'amp_sequences.0.name', 'amp_sequence.0.sequence', 'amp_sequence.0.blast', 'amp_sequence.0.unite', 'amp_sequence.0.boldsystems', 'amp_sequence.0.phytophthoradb', 'amp_sequence.0.notes', 'amp_sequences.1.name', 'amp_sequence.1.sequence', 'amp_sequence.1.blast', 'amp_sequence.1.unite', 'amp_sequence.1.boldsystems', 'amp_sequence.1.phytophthoradb', 'amp_sequence.1.notes', 'amp_sequences.2.name', 'amp_sequence.2.sequence', 'amp_sequence.2.blast', 'amp_sequence.2.unite', 'amp_sequence.2.boldsystems', 'amp_sequence.2.phytophthoradb', 'amp_sequence.2.notes', 'amp_sequences.3.name', 'amp_sequence.3.sequence', 'amp_sequence.3.blast', 'amp_sequence.3.unite', 'amp_sequence.3.boldsystems', 'amp_sequence.3.phytophthoradb', 'amp_sequence.3.notes', 'amp_sequences.4.name', 'amp_sequence.4.sequence', 'amp_sequence.4.blast', 'amp_sequence.4.unite', 'amp_sequence.4.boldsystems', 'amp_sequence.4.phytophthoradb', 'amp_sequence.4.notes'];
+			const opts = { fields, delimiter: ';', excelStrings: true };
+			try {
+				const parser = new Parser(opts);
+				const csv = parser.parse(data);
+				let fileName = 'regions-' + Date.now() + '.csv';
+				fs.writeFile(fileName, csv, (err) => {
+					if (err)
+						return console.log(err);
+					res.download(fileName, (err) => {
+						if (err)
+							return console.log(err);
+
+						fs.unlink(fileName, (err) => {
+							if (err)
+								return console.log(err);
+						});
+					});
+				});
+			} catch (e) {
+				console.log(e);
+			}
+		});
+	} else {
+		req.flash('error', 'Failed to export to csv!');
+		res.redirect('/dashboard');
+	}
+});
+
+router.get('/export/json/:type', ensureAuthenticated, (req, res) => {
+	if (req.params.type == 'primers') {
+		Primer.find().lean().exec((err, data) => {
+			if (err)
+				return console.log(err);
+			try {
+				let fileName = 'primers-' + Date.now() + '.json';
+				fs.writeFile(fileName, JSON.stringify(data), (err) => {
+					if (err)
+						return console.log(err);
+					res.download(fileName, (err) => {
+						if (err)
+							return console.log(err);
+						fs.unlink(fileName, (err) => {
+							if (err)
+								return console.log(err);
+						});
+					});
+				});
+			} catch (e) {
+				console.log(e);
+			}
+		});
+	} else if (req.params.type == 'regions') {
+		Region.find().lean().exec((err, data) => {
+			if (err)
+				return console.log(err);
+			try {
+				let fileName = 'regions-' + Date.now() + '.json';
+				fs.writeFile(fileName, JSON.stringify(data), (err) => {
+					if (err)
+						return console.log(err);
+					res.download(fileName, (err) => {
+						if (err)
+							return console.log(err);
+						fs.unlink(fileName, (err) => {
+							if (err)
+								return console.log(err);
+						});
+					});
+				});
+			} catch (e) {
+				console.log(e);
+			}
+		});
+	} else {
+		req.flash('error', 'Failed to export to csv!');
+		res.redirect('/dashboard');
 	}
 });
 
