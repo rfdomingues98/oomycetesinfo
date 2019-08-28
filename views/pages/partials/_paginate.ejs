@@ -1,15 +1,16 @@
 <% if(data.hasPrevPage || data.hasNextPage) { %>
+<% console.log(data); %>
 <nav aria-label="Page navigation">
 	<ul class="pagination justify-content-center">
 		<% if(data.hasPrevPage) { %>
 		<li class="page-item">
-			<a class="page-link" href="?page=1&perPage=<%= data.limit %>" aria-label="Previous">
+			<a class="page-link" href="?page=1&perPage=<%= data.limit %>" aria-label="First">
 				<span aria-hidden="true">&laquo;</span>
 			</a>
 		</li>
 		<% } else { %>
 		<li class="page-item disabled">
-			<a class="page-link" href="?page=1&perPage=<%= data.limit %>" aria-label="Previous">
+			<a class="page-link" href="?page=1&perPage=<%= data.limit %>" aria-label="First">
 				<span aria-hidden="true">&laquo;</span>
 			</a>
 		</li>
@@ -27,14 +28,16 @@
 			</a>
 		</li>
 		<% } %>
-		<% for(let i = 1; i <= data.totalPages; i++) { %>
-		<% if(i == data.page) { %>
-		<li class="page-item active"><a class="page-link" href="?page=<%= i %>&perPage=<%= data.limit %>"><%= i %></a>
+		<% data.pagesArray.forEach(page => { %>
+		<% if(page == data.page) { %>
+		<li class="page-item active"><a class="page-link"
+				href="?page=<%= page %>&perPage=<%= data.limit %>"><%= page %></a>
 		</li>
 		<% } else { %>
-		<li class="page-item"><a class="page-link" href="?page=<%= i %>&perPage=<%= data.limit %>"><%= i %></a></li>
+		<li class="page-item"><a class="page-link" href="?page=<%= page %>&perPage=<%= data.limit %>"><%= page %></a>
+		</li>
 		<% } %>
-		<% } %>
+		<% }) %>
 		<% if(data.hasNextPage) { %>
 		<li class="page-item">
 			<a class="page-link" href="?page=<%= data.nextPage %>&perPage=<%= data.limit %>" aria-label="Next">

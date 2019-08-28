@@ -1,11 +1,11 @@
 {
-  "name": "OomycetesInfo",
+  "name": "oomycetesinfo",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "start": "node ./bin/www",
+    "dev": "nodemon ./bin/www"
   },
   "keywords": [],
   "author": "Ricardo Filipe Sérgio Domingues",

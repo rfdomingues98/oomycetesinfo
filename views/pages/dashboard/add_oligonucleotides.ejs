@@ -1,0 +1,181 @@
+<%- contentFor('body') %>
+<% include ../partials/messages.ejs %>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+	<h1 class="h2">Insert oligonucleotide data</h1>
+</div>
+<div class="container">
+	<form id="add_oligonucleotide_form" action="/dashboard/add_oligonucleotides" method="POST">
+		<div class="form-group">
+			<label for="inputName">Name</label>
+			<input type="text" class="form-control" name="name" id="inputName" placeholder="Name" required>
+		</div>
+		<div class="form-group">
+			<label for="inputSequence">Sequence</label>
+			<input type="text" class="form-control" name="sequence" id="inputSequence" placeholder="Sequence" required>
+		</div>
+		<div class="form-group">
+			<label>Articles (max. 5)</label>
+			<div id="articles" class="container">
+			</div>
+			<div class="d-flex">
+				<button type="button" class="btn btn-link btn-sm add_article">+ Add article</button>
+				<button type="button" class="btn btn-link btn-sm remove_article ml-auto" disabled>- Remove last
+					article</button>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="inputBlast">BLAST</label>
+			<input type="text" class="form-control" name="blast" id="inputBlast" placeholder="BLAST">
+		</div>
+		<div class="form-group">
+			<label>Notes (max. 5)</label>
+			<div class="container" id="notes" name="notes">
+			</div>
+			<div class="d-flex ">
+				<button type="button" class="btn btn-link btn-sm add_note">+ Add note</button>
+				<button type="button" class="btn btn-link btn-sm remove_note ml-auto" disabled>- Remove last
+					note</button>
+			</div>
+		</div>
+		<input class="btn btn-primary my-3" type="submit" value="Insert oligonucleotide">
+	</form>
+	<a href="/dashboard" class="btn btn-primary my-3">Go back</a>
+</div>
+
+<%- contentFor('scripts') %>
+<script type="text/javascript">
+	$(document).ready(() => {
+		let maxFields = 5;
+		let minFields = 0;
+		let articles = $('#articles');
+		let notes = $('#notes');
+
+		let add_article = $('.add_article');
+		let remove_article = $('.remove_article');
+		let add_note = $('.add_note');
+		let remove_note = $('.remove_note');
+
+		let article_count = articles.children().length;
+		let note_count = notes.children().length;
+
+		const showHideFields = () => {
+			for (let i = 1; i <= article_count; i++) {
+				let checked = $(`input[name=customRadio${i}]:checked`, '#add_oligonucleotide_form').val();
+				if (checked == 'link') {
+					$(`#linkInput${i}`).show();
+					$(`#pdfInput${i}`).hide();
+				} else if (checked == 'pdf') {
+					$(`#linkInput${i}`).hide();
+					$(`#pdfInput${i}`).show();
+				}
+			}
+		};
+
+		$(articles).ready(() => {
+			showHideFields();
+		});
+
+		$(articles).change(() => {
+			showHideFields();
+		});
+
+		$(add_article).click(e => {
+			e.preventDefault();
+			if (article_count < maxFields) {
+				article_count++;
+				remove_article.attr('disabled', false);
+				$(articles).append(` <div id="article${article_count}">
+				<label for="inputArticle${article_count}">Article
+											${article_count}</label>
+											<input type="text" class="form-control" name="article"
+												id="inputArticle${article_count}" placeholder="Name">
+											<div class="form-row">
+												<div class="col-3">
+													<div class="custom-control custom-radio mt-3">
+														<input type="radio" id="isLink${article_count}"
+															name="customRadio${article_count}" value="link"
+															class="custom-control-input radio_toggle"
+															checked>
+														<label class="custom-control-label"
+															for="isLink${article_count}">Link</label>
+													</div>
+													<div class="custom-control custom-radio mt-3">
+														<input type="radio" id="isPDF${article_count}"
+															name="customRadio${article_count}" value="pdf"
+															class="custom-control-input radio_toggle">
+														<label class="custom-control-label"
+															for="isPDF${article_count}">PDF</label>
+													</div>
+												</div>
+												<div class="col-9 mt-3">
+													<div id="linkInput${article_count}" class="form-group">
+														<label for="inputLink${article_count}">Link</label>
+														<input type="text" class="form-control" name="link"
+															id="inputLink${article_count}" placeholder="Link">
+													</div>
+													<div id="pdfInput${article_count}" class="form-group">
+														<div class="input-group mb-1">
+															<div class="input-group-prepend">
+																<label class="input-group-text"
+																	for="pdfSelect">PDF</label>
+															</div>
+															<select class="custom-select"
+															size="2" name="pdf" id="pdfSelect${article_count}">
+																<option value="#!" selected>Choose a pdf...</option>
+																<% if(pdfList != undefined) { %>
+																<% for(let i = 0; i < pdfList.length; i++) { %>
+																<option value="<%= pdfList[i].Key.replace("articles/", "") %>"><%= pdfList[i].Key.replace("articles/", "") %></option>
+																<% } %>
+																<% } %>
+															</select>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+											`);
+			}
+			if (article_count >= maxFields) {
+				add_article.attr('disabled', true);
+			}
+			showHideFields();
+		});
+
+		$(remove_article).click(e => {
+			e.preventDefault();
+			if (article_count > minFields) {
+				article_count--;
+				$(`#article${article_count + 1}`).remove();
+				add_article.attr('disabled', false);
+			}
+			if (article_count == minFields) {
+				remove_article.attr('disabled', true);
+			}
+		});
+
+		$(add_note).click(e => {
+			e.preventDefault();
+			if (note_count < maxFields) {
+				remove_note.attr('disabled', false);
+				note_count++;
+				$(notes).append(`<div id="note${note_count}"><label for="inputNotes${note_count}">Note ${note_count}</label>
+					<input type="text" class="form-control" name="note" id="inputNotes${note_count}" placeholder="Note"></div>`);
+			}
+			if (note_count >= maxFields) {
+				add_note.attr('disabled', true);
+			}
+		});
+
+		$(remove_note).click(e => {
+			e.preventDefault();
+			if (note_count > minFields) {
+				note_count--;
+				$(`#note${note_count + 1}`).remove();
+				add_note.attr('disabled', false);
+			}
+			if (note_count == minFields) {
+				remove_note.attr('disabled', true);
+			}
+		});
+	});
+</script>

@@ -1,21 +1,86 @@
 <%- contentFor('body') %>
 <% include ../partials/messages.ejs %>
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-	<h1 class="h2">Insert primer data</h1>
+	<h1 class="h2">Edit oligonucleotide data</h1>
 </div>
 <div class="container">
-	<form id="add_primer_form" action="/dashboard/add_primers" method="POST">
+	<form id="edit_oligonucleotide_form" action="/dashboard/edit/oligonucleotides/<%= data._id %>" method="POST">
 		<div class="form-group">
-			<label for="inputPrimer">Primer</label>
-			<input type="text" class="form-control" name="primer" id="inputPrimer" placeholder="Primer" required>
+			<label for="inputName">Name</label>
+			<input type="text" class="form-control" name="name" value="<%= data.name %>" id="inputName"
+				placeholder="Name">
 		</div>
 		<div class="form-group">
 			<label for="inputSequence">Sequence</label>
-			<input type="text" class="form-control" name="sequence" id="inputSequence" placeholder="Sequence" required>
+			<input type="text" class="form-control" name="sequence" value="<%= data.sequence %>" id="inputSequence"
+				placeholder="Sequence">
 		</div>
 		<div class="form-group">
 			<label>Articles (max. 5)</label>
 			<div id="articles" class="container">
+				<% for(let i = 0; i < data.articles.length; i++) { %>
+				<div id="<%= 'article'+(i+1) %>">
+					<label for="<%= 'inputArticle'+(i+1) %>"><%= 'Article '+(i+1) %></label>
+					<input type="text" class="form-control" name="article" value="<%= data.articles[i].name %>"
+						id="<%= 'inputArticle'+(i+1) %>" placeholder="Name">
+					<div class="form-row">
+						<div class="col-3">
+							<% if(data.articles[i].pdf == false) { %>
+							<div class="custom-control custom-radio mt-3">
+								<input type="radio" id="<%= 'isLink'+(i+1) %>" name="<%= 'customRadio'+(i+1) %>"
+									value="link" class="custom-control-input radio_toggle" checked>
+								<label class="custom-control-label" for="<%= 'isLink'+(i+1) %>">Link</label>
+							</div>
+							<div class="custom-control custom-radio mt-3">
+								<input type="radio" id="<%= 'isPDF'+(i+1) %>" name="<%= 'customRadio'+(i+1) %>"
+									value="pdf" class="custom-control-input radio_toggle">
+								<label class="custom-control-label" for="<%= 'isPDF'+(i+1) %>">PDF</label>
+							</div>
+							<% } else { %>
+							<div class="custom-control custom-radio mt-3">
+								<input type="radio" id="<%= 'isLink'+(i+1) %>" name="<%= 'customRadio'+(i+1) %>"
+									value="link" class="custom-control-input radio_toggle">
+								<label class="custom-control-label" for="<%= 'isLink'+(i+1) %>">Link</label>
+							</div>
+							<div class="custom-control custom-radio mt-3">
+								<input type="radio" id="<%= 'isPDF'+(i+1) %>" name="<%= 'customRadio'+(i+1) %>"
+									value="pdf" class="custom-control-input radio_toggle" checked>
+								<label class="custom-control-label" for="<%= 'isPDF'+(i+1) %>">PDF</label>
+							</div>
+							<% } %>
+
+						</div>
+						<div class="col-9 mt-3">
+							<div id="<%= 'linkInput'+(i+1) %>" class="form-group">
+								<label for="<%= 'inputLink'+(i+1) %>">Link</label>
+								<input type="text" class="form-control" name="link" id="<%= 'inputLink'+(i+1) %>"
+									value="<%= data.articles[i].link %>" placeholder="Link">
+							</div>
+							<div id="<%= 'pdfInput'+(i+1) %>" class="form-group">
+								<div class="input-group mb-1">
+									<div class="input-group-prepend">
+										<label class="input-group-text" for="pdfSelect">PDF</label>
+									</div>
+									<select class="custom-select" name="pdf" size="2" id="<%= 'pdfSelect'+(i+1) %>">
+										<option value="#!">Choose a pdf...</option>
+										<% for(let j = 0; j < pdfList.length; j++) { %>
+										<% if(data.articles[i].link == pdfList[j].Key.replace("articles/", "")) { %>
+										<option value="<%=pdfList[j].Key.replace('articles/', '') %>" selected>
+											<%= pdfList[j].Key.replace("articles/", "") %></option>
+										<% } else { %>
+										<option value="<%=pdfList[j].Key.replace('articles/', '') %>">
+											<%= pdfList[j].Key.replace("articles/", "") %></option>
+										<% } %>
+										<% } %>
+									</select>
+								</div>
+								<a href="#!" data-toggle="modal" data-target="#addFileModal">+ Add new pdf
+									file</a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<% } %>
 			</div>
 			<div class="d-flex">
 				<button type="button" class="btn btn-link btn-sm add_article">+ Add article</button>
@@ -25,11 +90,19 @@
 		</div>
 		<div class="form-group">
 			<label for="inputBlast">BLAST</label>
-			<input type="text" class="form-control" name="blast" id="inputBlast" placeholder="BLAST">
+			<input type="text" class="form-control" name="blast" value="<%= data.blast %>" id="inputBlast"
+				placeholder="BLAST">
 		</div>
 		<div class="form-group">
 			<label>Notes (max. 5)</label>
 			<div class="container" id="notes" name="notes">
+				<% for(let i = 0; i < data.notes.length; i++) { %>
+				<div id="<%= 'note'+(i+1) %>">
+					<label for="<%= 'inputNotes'+(i+1) %>"><%= 'Note'+(i+1) %></label>
+					<input type="text" class="form-control" name="note" value="<%= data.notes[i].note %>"
+						id="<%= 'inputNotes'+(i+1) %>" placeholder="Note">
+				</div>
+				<% } %>
 			</div>
 			<div class="d-flex ">
 				<button type="button" class="btn btn-link btn-sm add_note">+ Add note</button>
@@ -37,9 +110,9 @@
 					note</button>
 			</div>
 		</div>
-		<input class="btn btn-primary my-3" type="submit" value="Insert primer">
+		<input class="btn btn-primary my-3" type="submit" value="Update oligonucleotide">
 	</form>
-	<a href="/dashboard" class="btn btn-primary my-3">Go back</a>
+	<a href="/dashboard/manage_oligonucleotides" class="btn btn-primary my-3">Go back</a>
 </div>
 
 <%- contentFor('scripts') %>
@@ -49,7 +122,6 @@
 		let minFields = 0;
 		let articles = $('#articles');
 		let notes = $('#notes');
-
 		let add_article = $('.add_article');
 		let remove_article = $('.remove_article');
 		let add_note = $('.add_note');
@@ -60,7 +132,7 @@
 
 		const showHideFields = () => {
 			for (let i = 1; i <= article_count; i++) {
-				let checked = $(`input[name=customRadio${i}]:checked`, '#add_primer_form').val();
+				let checked = $(`input[name=customRadio${i}]:checked`, '#edit_primer_form').val();
 				if (checked == 'link') {
 					$(`#linkInput${i}`).show();
 					$(`#pdfInput${i}`).hide();
@@ -121,12 +193,12 @@
 															</div>
 															<select class="custom-select"
 															size="2" name="pdf" id="pdfSelect${article_count}">
-																<option value="#!" selected>Choose a pdf...</option>
-																<% if(pdfList != undefined) { %>
-																<% for(let i = 0; i < pdfList.length; i++) { %>
-																<option value="<%= pdfList[i].Key.replace("articles/", "") %>"><%= pdfList[i].Key.replace("articles/", "") %></option>
-																<% } %>
-																<% } %>
+															<option value="#!" selected>Choose a pdf...</option>
+															<% if(pdfList != undefined) { %>
+															<% for(let i = 0; i < pdfList.length; i++) { %>
+															<option value="<%=pdfList[i].ETag %>"><%= pdfList[i].Key.replace("articles/", "") %></option>
+															<% } %>
+															<% } %>
 															</select>
 														</div>
 													</div>
@@ -147,7 +219,7 @@
 				article_count--;
 				$(`#article${article_count + 1}`).remove();
 				add_article.attr('disabled', false);
-			}
+			};
 			if (article_count == minFields) {
 				remove_article.attr('disabled', true);
 			}
@@ -172,7 +244,7 @@
 				note_count--;
 				$(`#note${note_count + 1}`).remove();
 				add_note.attr('disabled', false);
-			}
+			};
 			if (note_count == minFields) {
 				remove_note.attr('disabled', true);
 			}

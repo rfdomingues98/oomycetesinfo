@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const aws = require('aws-sdk');
 
 const Primer = require('../models/primers');
+const Oligonucleotide = require('../models/oligonucleotides');
 const Region = require('../models/regions');
 const Clustal = require('../models/clustal');
 
@@ -16,6 +17,49 @@ aws.config.update({
 });
 
 const s3 = new aws.S3();
+
+const pagination = (paginate, size) => {
+	let { page, totalPages } = paginate;
+	let pagesArray = [];
+
+	if (totalPages > size) {
+		if (page - Math.ceil(size / 2) < 1) {
+
+			for (let i = 1; i <= size; i++) {
+				if (pagesArray.length >= size) {
+					pagesArray.shift();
+					pagesArray.push(i);
+				} else {
+					pagesArray.push(i);
+				}
+			}
+		} else if (page + Math.ceil(size / 2) > totalPages) {
+			for (let i = totalPages - size; i <= totalPages; i++) {
+				if (pagesArray.length >= size) {
+					pagesArray.shift();
+					pagesArray.push(i);
+				} else {
+					pagesArray.push(i);
+				}
+			}
+		} else {
+			for (let i = page - Math.ceil(size / 2); i <= page + Math.ceil(size / 2); i++) {
+				if (pagesArray.length >= size) {
+					pagesArray.shift();
+					pagesArray.push(i);
+				} else {
+					pagesArray.push(i);
+				}
+			}
+		}
+	} else {
+		for (let i = 1; i <= totalPages; i++) {
+			pagesArray.push(i);
+		}
+	}
+	paginate.pagesArray = pagesArray;
+	return paginate;
+};
 
 router.get('/', (req, res) => {
 	let perPage = 10;
@@ -40,7 +84,7 @@ router.get('/primers', async (req, res, next) => {
 	const primers = await Primer.paginate({}, options);
 	ctx = {
 		title: 'Primers Info',
-		data: primers
+		data: pagination(primers, 5)
 	};
 	res.render('primers', ctx);
 });
@@ -114,6 +158,62 @@ router.post('/primers/search', (req, res) => {
 	}
 });
 
+router.get('/oligonucleotides', async (req, res) => {
+	let page = req.query.page || 1;
+	let perPage = req.query.perPage || 10;
+
+	let maxPerPage = 10;
+	let options = {
+		page: parseInt(page, 10),
+		limit: parseInt(perPage, 10) > maxPerPage ? maxPerPage : parseInt(perPage, 10),
+		sort: { date: -1 }
+	};
+
+	const oligonucleotides = await Oligonucleotide.paginate({}, options);
+	ctx = {
+		title: 'Oligonucleotides Info',
+		data: pagination(oligonucleotides, 5)
+	};
+	res.render('oligonucleotides', ctx);
+});
+
+router.post('/oligonucleotides/search', (req, res) => {
+	let { searchFor, search } = req.body;
+	let result = {};
+	let data;
+	if (searchFor == 'name') {
+		Oligonucleotide.find({ name: search }, (err, data) => {
+			if (err)
+				return console.log(err);
+			if (typeof (data) == 'string') {
+				result.docs = [data];
+			} else {
+				result.docs = data;
+			}
+			let ctx = {
+				title: 'Oligonucleotides Info',
+				data: result
+			};
+			res.render('oligonucleotides', ctx);
+		});
+	} else {
+		Oligonucleotide.find({ sequence: search }, (err, data) => {
+			if (err)
+				return console.log(err);
+			if (typeof (data) == 'string') {
+				result.docs = [data];
+			} else {
+				result.docs = data;
+			}
+			let ctx = {
+				title: 'Oligonucleotides Info',
+				data: result
+			};
+			res.render('oligonucleotides', ctx);
+		});
+	}
+});
+
 router.get('/regions', async (req, res) => {
 	let page = req.query.page || 1;
 	let perPage = req.query.perPage || 10;
@@ -128,7 +228,7 @@ router.get('/regions', async (req, res) => {
 	const region = await Region.paginate({}, options);
 	let ctx = {
 		title: 'Target Regions Info',
-		data: region
+		data: pagination(region, 5)
 	};
 	res.render('regions', ctx);
 });

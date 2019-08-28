@@ -9,6 +9,7 @@ const crypto = require('crypto');
 const { Parser } = require('json2csv');
 
 const Primer = require('../models/primers');
+const Oligonucleotide = require('../models/oligonucleotides');
 const Region = require('../models/regions');
 const Clustal = require('../models/clustal');
 
@@ -66,6 +67,7 @@ const fileCheckPdf = (file, cb) => {
 		cb('File not supported! Only pdf allowed!');
 	}
 };
+
 const fileCheckClustal = (file, cb) => {
 	const filetypes = /html/;
 	const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
@@ -76,6 +78,49 @@ const fileCheckClustal = (file, cb) => {
 	} else {
 		cb('File not supported! Only html allowed!');
 	}
+};
+
+const pagination = (paginate, size) => {
+	let { page, totalPages } = paginate;
+	let pagesArray = [];
+
+	if (totalPages > size) {
+		if (page - Math.ceil(size / 2) < 1) {
+
+			for (let i = 1; i <= size; i++) {
+				if (pagesArray.length >= size) {
+					pagesArray.shift();
+					pagesArray.push(i);
+				} else {
+					pagesArray.push(i);
+				}
+			}
+		} else if (page + Math.ceil(size / 2) > totalPages) {
+			for (let i = totalPages - size; i <= totalPages; i++) {
+				if (pagesArray.length >= size) {
+					pagesArray.shift();
+					pagesArray.push(i);
+				} else {
+					pagesArray.push(i);
+				}
+			}
+		} else {
+			for (let i = page - Math.ceil(size / 2); i <= page + Math.ceil(size / 2); i++) {
+				if (pagesArray.length >= size) {
+					pagesArray.shift();
+					pagesArray.push(i);
+				} else {
+					pagesArray.push(i);
+				}
+			}
+		}
+	} else {
+		for (let i = 1; i <= totalPages; i++) {
+			pagesArray.push(i);
+		}
+	}
+	paginate.pagesArray = pagesArray;
+	return paginate;
 };
 
 router.get('/', ensureAuthenticated, (req, res) => {
@@ -217,13 +262,134 @@ router.post('/add_primers', ensureAuthenticated, (req, res, next) => {
 	});
 });
 
-router.get('/add_oligonucleotides', ensureAuthenticated, (req, res) => {
-	res.render('./dashboard/add_oligonucleotides',
-		{
+router.get('/add_oligonucleotides', ensureAuthenticated, (req, res, next) => {
+	let params = {
+		Bucket: process.env.AWS_BUCKET_NAME,
+		Prefix: 'articles/'
+	};
+	s3.listObjectsV2(params, (err, data) => {
+		if (err)
+			return console.log(err);
+		data.Contents.shift();
+		let ctx = {
 			layout: 'layout_dashboard',
-			title: 'Add Oligonucleotides'
+			title: 'Add Oligonucleotides',
+			pdfList: data.Contents
+		};
+		res.render('./dashboard/add_oligonucleotides', ctx);
+	});
+});
+
+router.post('/add_oligonucleotides', ensureAuthenticated, (req, res, next) => {
+	let { name, sequence, article, link, pdf, blast, note } = req.body;
+	sequence = sequence.trim();
+	Oligonucleotide.find({ "sequence": sequence }, (err, result) => {
+		if (err)
+			return console.log(err);
+		if (result.sequence == sequence) {
+			req.flash('error', 'That sequence already exists in our database!');
+			res.redirect('/dashboard/add_oligonucleotides');
+		} else {
+			let articles = [];
+			let notes = [];
+			if (article != undefined) {
+				if (link != undefined) {
+					for (let i = 0; i < link.length; i++) {
+						if (link[i] == '')
+							link[i] = '#!';
+					}
+				}
+				if (pdf != undefined) {
+					for (let i = 0; i < pdf.length; i++) {
+						if (pdf[i] == '')
+							pdf[i] = '#!';
+					}
+				}
+			} else {
+				article = {};
+			}
+
+			if (typeof (article) == "string") {
+				article = [article];
+			}
+			if (typeof (link) == "string") {
+				link = [link];
+			}
+			if (typeof (pdf) == "string") {
+				pdf = [pdf];
+			}
+			if (typeof (note) == "string") {
+				note = [note];
+			}
+
+			const checkDuplicate = (arr, duplicate) => {
+				return arr.filter(item => item == duplicate).length;
+			};
+			for (let j = 0; j < 5; j++) {
+				let radio = req.body['customRadio' + (j + 1)];
+				if (article[j] == '' && ((link[j] != '' && link[j] != '#!') || (pdf[j] != '' && pdf[j] != '#!'))) {
+					article[j] = "Link";
+				}
+				if (radio == 'link') {
+					if (link != undefined) {
+
+						if (link[j] != '#!' && link[j] != undefined) {
+							if (checkDuplicate(link, link[j]) > 1) {
+								req.flash('warning_msg', 'Duplicate articles are not allowed!');
+								res.redirect('/dashboard/add_oligonucleotides');
+							}
+						}
+						let objArticle = {
+							'name': article[j],
+							'pdf': false,
+							'link': link[j]
+						};
+						articles.push(objArticle);
+					}
+				} else if (radio == 'pdf') {
+					if (pdf != undefined) {
+
+						if (pdf[j] != '#!' && pdf[j] != undefined) {
+							if (checkDuplicate(pdf, pdf[j]) > 1) {
+								req.flash('warning_msg', 'Duplicate articles are not allowed!');
+								res.redirect('/dashboard/add_oligonucleotides');
+							}
+						}
+						let objArticle = {
+							'name': article[j],
+							'pdf': true,
+							'link': pdf[j]
+						};
+						articles.push(objArticle);
+					}
+				}
+				if (note != undefined) {
+					if (note[j])
+						notes.push({ 'note': note[j] });
+				} else {
+					note = {};
+				}
+			}
+
+			let obj = new Oligonucleotide({
+				name,
+				sequence,
+				articles,
+				blast,
+				notes
+			});
+
+			obj
+				.save()
+				.then(() => {
+					req.flash('success_msg', 'Added oligonucleotide successfully!');
+					res.redirect('/dashboard/add_oligonucleotides');
+				})
+				.catch(err => {
+					console.log(err);
+				});
 		}
-	);
+	});
 });
 
 router.get('/add_regions', ensureAuthenticated, (req, res) => {
@@ -445,18 +611,32 @@ router.get('/manage_primers', ensureAuthenticated, async (req, res) => {
 	ctx = {
 		layout: 'layout_dashboard',
 		title: 'Manage Primers',
-		data: primers
+		data: pagination(primers, 5)
 	};
 	res.render('./dashboard/manage_primers', ctx);
 });
 
-router.get('/manage_oligonucleotides', ensureAuthenticated, (req, res) => {
-	res.render('./dashboard/manage_oligonucleotides',
-		{
-			layout: 'layout_dashboard',
-			title: 'Manage Oligonucleotides'
-		}
-	);
+router.get('/manage_oligonucleotides', ensureAuthenticated, async (req, res) => {
+	let pdfList = [];
+
+	let page = req.query.page || 1;
+	let perPage = req.query.perPage || 5;
+
+	let maxPerPage = 10;
+	let options = {
+		page: parseInt(page, 10),
+		limit: parseInt(perPage, 10) > maxPerPage ? maxPerPage : parseInt(perPage, 10),
+		sort: { date: -1 }
+	};
+
+	const oligonucleotides = await Oligonucleotide.paginate({}, options);
+
+	ctx = {
+		layout: 'layout_dashboard',
+		title: 'Manage Oligonucleotides',
+		data: pagination(oligonucleotides, 5)
+	};
+	res.render('./dashboard/manage_oligonucleotides', ctx);
 });
 
 router.get('/manage_regions', ensureAuthenticated, async (req, res) => {
@@ -474,7 +654,7 @@ router.get('/manage_regions', ensureAuthenticated, async (req, res) => {
 	let ctx = {
 		title: 'Manage Target Regions',
 		layout: 'layout_dashboard',
-		data: region
+		data: pagination(region, 5)
 	};
 	res.render('./dashboard/manage_regions', ctx);
 });
@@ -618,6 +798,132 @@ router.post('/edit/primer/:id', ensureAuthenticated, (req, res) => {
 		} else {
 			req.flash('success_msg', 'Primer updated successfully!');
 			res.redirect('/dashboard/manage_primers');
+		}
+	});
+});
+
+router.get('/edit/oligonucleotide/:id', ensureAuthenticated, (req, res) => {
+	Oligonucleotide.find({ _id: req.params.id }, (err, result) => {
+		if (err) {
+			return res.send('Page not found!');
+		}
+
+		let params = {
+			Bucket: process.env.AWS_BUCKET_NAME,
+			Prefix: 'articles/'
+		};
+		s3.listObjectsV2(params, (err, data) => {
+			if (err)
+				return console.log(err);
+			data.Contents.shift();
+			let ctx = {
+				layout: 'layout_dashboard',
+				title: 'Manage Oligonucleotides',
+				data: result[0],
+				pdfList: data.Contents
+			};
+			res.render('./dashboard/edit_oligonucleotides', ctx);
+		});
+	});
+});
+
+router.post('/edit/oligonucleotide/:id', ensureAuthenticated, (req, res) => {
+	let { name, sequence, article, link, pdf, blast, note } = req.body;
+	let articles = [];
+	let notes = [];
+	if (article != undefined) {
+		if (link != undefined) {
+			for (let i = 0; i < link.length; i++) {
+				if (link[i] == '')
+					link[i] = '#!';
+			}
+		}
+		if (pdf != undefined) {
+			for (let i = 0; i < pdf.length; i++) {
+				if (pdf[i] == '')
+					pdf[i] = '#!';
+			}
+		}
+	} else {
+		article = {};
+	}
+
+	if (typeof (article) == "string") {
+		article = [article];
+	}
+	if (typeof (link) == "string") {
+		link = [link];
+	}
+	if (typeof (pdf) == "string") {
+		pdf = [pdf];
+	}
+	if (typeof (note) == "string") {
+		note = [note];
+	}
+
+	const checkDuplicate = (arr, duplicate) => {
+		return arr.filter(item => item == duplicate).length;
+	};
+	for (let j = 0; j < 5; j++) {
+		let radio = req.body['customRadio' + (j + 1)];
+		if (article[j] == '' && ((link[j] != '' && link[j] != '#!') || (pdf[j] != '' && pdf[j] != '#!'))) {
+			article[j] = "Link";
+		}
+		if (radio == 'link') {
+			if (link != undefined) {
+				if (link[j] != '#!' && link[j] != undefined) {
+					if (checkDuplicate(link, link[j]) > 1) {
+						req.flash('warning_msg', 'Duplicate articles are not allowed!');
+						res.redirect('/dashboard/edit/oligonucleotide/' + req.params.id);
+					}
+					let objArticle = {
+						'name': article[j],
+						'pdf': false,
+						'link': link[j]
+					};
+					articles.push(objArticle);
+				}
+			}
+		} else if (radio == 'pdf') {
+			if (pdf != undefined) {
+				if (pdf[j] != '#!' && pdf[j] != undefined) {
+					if (checkDuplicate(pdf, pdf[j]) > 1) {
+						req.flash('warning_msg', 'Duplicate articles are not allowed!');
+						res.redirect('/dashboard/edit/oligonucleotide/' + req.params.id);
+					}
+				}
+				let objArticle = {
+					'name': article[j],
+					'pdf': true,
+					'link': pdf[j]
+				};
+				articles.push(objArticle);
+			}
+		}
+		if (note != undefined) {
+			if (note[j])
+				notes.push({ 'note': note[j] });
+		} else {
+			note = {};
+		}
+	}
+
+	let obj = {
+		name,
+		sequence,
+		articles,
+		blast,
+		notes
+	};
+
+	Oligonucleotide.findByIdAndUpdate(req.params.id, obj, { new: true }, (err, result) => {
+		if (err) {
+			console.log(err);
+			req.flash('warning_msg', 'Failed to update oligonucleotide!');
+			res.redirect('/dashboard/edit/oligonucleotide/' + req.params.id);
+		} else {
+			req.flash('success_msg', 'Oligonucleotide updated successfully!');
+			res.redirect('/dashboard/manage_oligonucleotides');
 		}
 	});
 });
@@ -836,6 +1142,19 @@ router.get('/delete/primer/:id', ensureAuthenticated, (req, res, next) => {
 	});
 });
 
+router.get('/delete/oligonucleotide/:id', ensureAuthenticated, (req, res, next) => {
+	Oligonucleotide.findByIdAndDelete({ _id: req.params.id }, (err, result) => {
+		if (err) {
+			console.log(err);
+			req.flash('error', 'Failed to delete oligonucleotide!');
+			res.redirect('/dashboard/manage_oligonucleotides');
+		} else {
+			req.flash('success_msg', 'Oligonucleotide deleted successfully!');
+			res.redirect('/dashboard/manage_oligonucleotides');
+		}
+	});
+});
+
 router.get('/delete/region/:id', ensureAuthenticated, (req, res, next) => {
 	Region.findByIdAndDelete({ _id: req.params.id }, (err, result) => {
 		if (err) {
@@ -897,6 +1216,45 @@ router.post('/primers/search', (req, res) => {
 				data: result
 			};
 			res.render('./dashboard/manage_primers', ctx);
+		});
+	}
+});
+
+router.post('/oligonucleotides/search', (req, res) => {
+	let { searchFor, search } = req.body;
+	let result = {};
+	let data;
+	if (searchFor == 'name') {
+		Oligonucleotide.find({ name: search }, (err, data) => {
+			if (err)
+				return console.log(err);
+			if (typeof (data) == 'string') {
+				result.docs = [data];
+			} else {
+				result.docs = data;
+			}
+			let ctx = {
+				title: 'Manage Oligonucleotides',
+				layout: 'layout_dashboard',
+				data: result
+			};
+			res.render('./dashboard/manage_oligonucleotides', ctx);
+		});
+	} else {
+		Oligonucleotide.find({ sequence: search }, (err, data) => {
+			if (err)
+				return console.log(err);
+			if (typeof (data) == 'string') {
+				result.docs = [data];
+			} else {
+				result.docs = data;
+			}
+			let ctx = {
+				title: 'Manage Oligonucleotides',
+				layout: 'layout_dashboard',
+				data: result
+			};
+			res.render('./dashboard/manage_oligonucleotides', ctx);
 		});
 	}
 });
@@ -1099,6 +1457,33 @@ router.get('/export/csv/:type', ensureAuthenticated, (req, res) => {
 				console.log(e);
 			}
 		});
+	} else if (req.params.type == 'oligonucleotides') {
+		Oligonucleotide.find().lean().exec((err, data) => {
+			if (err)
+				return console.log(err);
+			const fields = ['name', 'sequence', 'articles.0.name', 'articles.1.name', 'articles.2.name', 'articles.3.name', 'articles.4.name', 'blast', 'notes.0.note', 'notes.1.note', 'notes.2.note', 'notes.3.note', 'notes.4.note'];
+			const opts = { fields, delimiter: ';', excelStrings: true };
+			try {
+				const parser = new Parser(opts);
+				const csv = parser.parse(data);
+				let fileName = 'oligonucleotides-' + Date.now() + '.csv';
+				fs.writeFile(fileName, csv, (err) => {
+					if (err)
+						return console.log(err);
+					res.download(fileName, (err) => {
+						if (err)
+							return console.log(err);
+
+						fs.unlink(fileName, (err) => {
+							if (err)
+								return console.log(err);
+						});
+					});
+				});
+			} catch (e) {
+				console.log(e);
+			}
+		});
 	} else if (req.params.type == 'regions') {
 		Region.find().lean().exec((err, data) => {
 			if (err)
@@ -1155,6 +1540,28 @@ router.get('/export/json/:type', ensureAuthenticated, (req, res) => {
 				console.log(e);
 			}
 		});
+	} else if (req.params.type == 'oligonucleotides') {
+		Oligonucleotide.find().lean().exec((err, data) => {
+			if (err)
+				return console.log(err);
+			try {
+				let fileName = 'oligonucleotides-' + Date.now() + '.json';
+				fs.writeFile(fileName, JSON.stringify(data), (err) => {
+					if (err)
+						return console.log(err);
+					res.download(fileName, (err) => {
+						if (err)
+							return console.log(err);
+						fs.unlink(fileName, (err) => {
+							if (err)
+								return console.log(err);
+						});
+					});
+				});
+			} catch (e) {
+				console.log(e);
+			}
+		});
 	} else if (req.params.type == 'regions') {
 		Region.find().lean().exec((err, data) => {
 			if (err)
@@ -1178,7 +1585,7 @@ router.get('/export/json/:type', ensureAuthenticated, (req, res) => {
 			}
 		});
 	} else {
-		req.flash('error', 'Failed to export to csv!');
+		req.flash('error', 'Failed to export to json!');
 		res.redirect('/dashboard');
 	}
 });
