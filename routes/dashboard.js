@@ -1333,7 +1333,7 @@ router.get('/manage_clustal', ensureAuthenticated, async (req, res) => {
 	let ctx = {
 		layout: 'layout_dashboard',
 		title: 'CLUSTAL Data',
-		data: clustal
+		data: pagination(clustal, 5)
 	};
 	res.render('./dashboard/manage_clustal', ctx);
 });

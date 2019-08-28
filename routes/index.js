@@ -296,7 +296,7 @@ router.get('/clustal', async (req, res) => {
 	let ctx = {
 		layout: 'layout',
 		title: 'CLUSTAL Data',
-		data: clustal
+		data: pagination(clustal, 5)
 	};
 	res.render('clustal', ctx);
 });
