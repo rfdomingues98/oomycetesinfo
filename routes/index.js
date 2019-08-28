@@ -43,7 +43,7 @@ const pagination = (paginate, size) => {
 				}
 			}
 		} else {
-			for (let i = page - Math.ceil(size / 2); i <= page + Math.ceil(size / 2); i++) {
+			for (let i = page - Math.ceil(size / 2); i < page + Math.ceil(size / 2); i++) {
 				if (pagesArray.length >= size) {
 					pagesArray.shift();
 					pagesArray.push(i);
