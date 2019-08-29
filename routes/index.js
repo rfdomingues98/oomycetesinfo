@@ -97,12 +97,27 @@ router.get('/download/article/:id', (req, res) => {
 		Key: key
 	};
 
+	// res.attachment(key);
+	// var fileStream = s3.getObject(params, (err, data) => {
+	// 	if (err)
+	// 		return console.log(err);
+	// 	console.log(data.Body);
+	// }).createReadStream();
+	// fileStream.pipe(res);
 	res.attachment(key);
-	let fs = s3.getObject(params, (err, data) => {
-		if (err)
-			return console.log(err, err.stack);
-	}).createReadStream();
-	fs.pipe(res);
+	let file = s3
+		.getObject(params)
+		.on('error', (err) => {
+			console.log(err);
+		})
+		.on('httpData', (chunk) => {
+			file.write(chunk);
+		})
+		.on('httpDone', () => {
+			file.end();
+		})
+		.createReadStream();
+	file.pipe(res);
 });
 
 router.get('/download/clustal/:id', (req, res) => {
@@ -114,11 +129,19 @@ router.get('/download/clustal/:id', (req, res) => {
 	};
 
 	res.attachment(key);
-	let fs = s3.getObject(params, (err, data) => {
-		if (err)
-			return console.log(err, err.stack);
-	}).createReadStream();
-	fs.pipe(res);
+	let file = s3
+		.getObject(params)
+		.on('error', (err) => {
+			console.log(err);
+		})
+		.on('httpData', (chunk) => {
+			file.write(chunk);
+		})
+		.on('httpDone', () => {
+			file.end();
+		})
+		.createReadStream();
+	file.pipe(res);
 });
 
 router.post('/primers/search', (req, res) => {

@@ -63,11 +63,10 @@
 					<td>
 						<% for(let j = 0; j < data.docs[i].articles.length; j++) { %>
 						<% if (data.docs[i].articles[j].pdf) { %>
-						<a href="/download/article/<%= data.docs[i].articles[j].link %>"
-							target="_blank"><%= data.docs[i].articles[j].name %></a>
+						<a
+							href="/download/article/<%= data.docs[i].articles[j].link %>"><%= data.docs[i].articles[j].name %></a>
 						<% } else { %>
-						<a href="<%= data.docs[i].articles[j].link %>"
-							target="_blank"><%= data.docs[i].articles[j].name %></a>
+						<a href="<%= data.docs[i].articles[j].link %>"><%= data.docs[i].articles[j].name %></a>
 						<% } %>
 						<% if (j != data.docs[i].articles.length -1) { %>
 						<hr>
