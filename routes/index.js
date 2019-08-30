@@ -97,13 +97,6 @@ router.get('/download/article/:id', (req, res) => {
 		Key: key
 	};
 
-	// res.attachment(key);
-	// var fileStream = s3.getObject(params, (err, data) => {
-	// 	if (err)
-	// 		return console.log(err);
-	// 	console.log(data.Body);
-	// }).createReadStream();
-	// fileStream.pipe(res);
 	res.attachment(key);
 	let file = s3
 		.getObject(params)

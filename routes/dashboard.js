@@ -597,7 +597,7 @@ router.get('/manage_primers', ensureAuthenticated, async (req, res) => {
 	let pdfList = [];
 
 	let page = req.query.page || 1;
-	let perPage = req.query.perPage || 5;
+	let perPage = req.query.perPage || 10;
 
 	let maxPerPage = 10;
 	let options = {
@@ -620,7 +620,7 @@ router.get('/manage_oligonucleotides', ensureAuthenticated, async (req, res) => 
 	let pdfList = [];
 
 	let page = req.query.page || 1;
-	let perPage = req.query.perPage || 5;
+	let perPage = req.query.perPage || 10;
 
 	let maxPerPage = 10;
 	let options = {
