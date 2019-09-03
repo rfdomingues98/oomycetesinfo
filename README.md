@@ -1,4 +1,4 @@
-# oomycetesinfo
+# OomycetesInfo
 Web app developed during an internship at UC Biotech to orgazine data that could be useful in oomycetes research.
 Technologies used:
   * NodeJS
